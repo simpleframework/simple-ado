@@ -1,0 +1,28 @@
+package net.simpleframework.ado;
+
+import java.util.Collection;
+
+/**
+ * Licensed under the Apache License, Version 2.0
+ * 
+ * @author 陈侃(cknet@126.com, 13910090885)
+ *         http://code.google.com/p/simpleframework/
+ *         http://www.simpleframework.net
+ */
+public interface IADOManagerFactory {
+
+	/**
+	 * 获取实体管理类
+	 * 
+	 * @param beanClass
+	 * @return
+	 */
+	// IADOManager getEntityManager(final Class<?> beanClass);
+
+	/**
+	 * 获取所有的实体管理器
+	 * 
+	 * @return
+	 */
+	Collection<? extends IADOManager> allEntityManager();
+}
