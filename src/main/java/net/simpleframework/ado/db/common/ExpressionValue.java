@@ -1,7 +1,15 @@
 package net.simpleframework.ado.db.common;
 
+import java.util.ArrayList;
+import java.util.Date;
+
+import net.simpleframework.ado.EFilterRelation;
+import net.simpleframework.ado.FilterItem;
 import net.simpleframework.ado.UniqueValue;
+import net.simpleframework.common.Convert;
+import net.simpleframework.common.ETimePeriod;
 import net.simpleframework.common.StringUtils;
+import net.simpleframework.common.TimePeriod;
 
 /**
  * Licensed under the Apache License, Version 2.0
@@ -36,5 +44,71 @@ public class ExpressionValue extends UniqueValue {
 		}
 		sb.append(valuesToString());
 		return sb.toString();
+	}
+
+	public static ExpressionValue toExpressionValue(final FilterItem item) {
+		final Object val = item.getValue();
+		if (val == null) {
+			return null;
+		}
+
+		ArrayList<Object> al = null;
+		StringBuilder sql = null;
+
+		if (val instanceof TimePeriod) {
+			final TimePeriod timePeriod = (TimePeriod) val;
+			ETimePeriod tp;
+			if (timePeriod == null || (tp = timePeriod.getTimePeriod()) == ETimePeriod.none) {
+				return null;
+			}
+
+			sql = new StringBuilder();
+			al = new ArrayList<Object>();
+			final String column = item.getColumn();
+			if (tp == ETimePeriod.custom) {
+				final Date from = timePeriod.getFrom();
+				final Date to = timePeriod.getTo();
+				if (from != null || to != null) {
+					sql.append("(").append(column);
+					if (from != null) {
+						sql.append(" > ?");
+						al.add(from);
+					}
+					if (to != null) {
+						if (from != null) {
+							sql.append(" and ").append(column);
+						}
+						sql.append(" < ?");
+						al.add(to);
+					}
+					sql.append(")");
+				}
+			} else {
+				sql.append(column).append(" > ?");
+				al.add(timePeriod.getTime());
+			}
+		} else {
+			final EFilterRelation relation = item.getRelation();
+			if (relation == EFilterRelation.like) {
+				final String sVal = Convert.toString(val);
+				if (!StringUtils.hasText(sVal)) {
+					return null;
+				}
+			}
+
+			sql = new StringBuilder();
+			al = new ArrayList<Object>();
+
+			sql.append(item.getColumn()).append(" ").append(relation);
+			if (relation == EFilterRelation.like) {
+				sql.append(" '%").append(val).append("%'");
+			} else if (relation != EFilterRelation.isNull || relation != EFilterRelation.isNotNull) {
+				sql.append(" ?");
+				al.add(val);
+			}
+		}
+
+		return (sql == null || sql.length() == 0) ? null : new ExpressionValue(sql.toString(),
+				al.toArray());
 	}
 }
