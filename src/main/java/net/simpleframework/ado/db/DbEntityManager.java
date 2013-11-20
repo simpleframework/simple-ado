@@ -408,11 +408,9 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 			return null;
 		}
 
-		final String orderName;
+		final String orderName = order.getName(), orderSqlName = order.getSqlName();
 		final long i1;
 		final long i2;
-
-		orderName = order.getSqlName();
 		i1 = ((Number) BeanUtils.getProperty(bean1, orderName)).longValue();
 		i2 = ((Number) BeanUtils.getProperty(bean2, orderName)).longValue();
 		if (i1 == i2) {
@@ -425,12 +423,12 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 		final String tn = getEntityTable().getName();
 		final StringBuilder sb = new StringBuilder();
 		sb.append("update ").append(tn).append(" set ");
-		sb.append(orderName).append("=? where ").append(orderName).append("=?");
+		sb.append(orderSqlName).append("=? where ").append(orderSqlName).append("=?");
 		final String sql = sb.toString();
 		sb.setLength(0);
-		sb.append("update ").append(tn).append(" set ").append(orderName);
-		sb.append("=").append(orderName).append("+? where ");
-		sb.append(orderName).append(">? and ").append(orderName).append("<?");
+		sb.append("update ").append(tn).append(" set ").append(orderSqlName);
+		sb.append("=").append(orderSqlName).append("+? where ");
+		sb.append(orderSqlName).append(">? and ").append(orderSqlName).append("<?");
 		final String sql2 = sb.toString();
 		if (order.getOrder() == EOrder.asc && up) {
 			executeUpdate(new SQLValue(sql, -1, min));
