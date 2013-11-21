@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import net.simpleframework.ado.ADOException;
@@ -13,12 +14,14 @@ import net.simpleframework.ado.IParamsValue;
 import net.simpleframework.ado.UniqueValue;
 import net.simpleframework.ado.bean.IIdBeanAware;
 import net.simpleframework.ado.bean.IOrderBeanAware;
+import net.simpleframework.ado.bean.ITreeBeanAware;
 import net.simpleframework.ado.db.common.EntityInterceptor;
 import net.simpleframework.ado.db.common.ExpressionValue;
 import net.simpleframework.ado.db.common.SQLValue;
 import net.simpleframework.ado.db.common.TableColumn;
 import net.simpleframework.ado.db.event.IDbEntityListener;
 import net.simpleframework.ado.db.jdbc.IQueryExtractor;
+import net.simpleframework.ado.query.DataQueryUtils;
 import net.simpleframework.ado.trans.ITransactionCallback;
 import net.simpleframework.ado.trans.TransactionObjectCallback;
 import net.simpleframework.common.BeanUtils;
@@ -398,51 +401,81 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 		});
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object exchange(final Object bean1, final Object bean2, final TableColumn order,
-			final boolean up) {
+	public Object exchange(final T bean1, final T bean2, final TableColumn order, final boolean up) {
 		if (bean1 == null || bean2 == null || order == null) {
 			return null;
 		}
-		if (!bean1.getClass().equals(bean2.getClass())) {
-			return null;
-		}
 
-		final String orderName = order.getName(), orderSqlName = order.getSqlName();
-		final long i1;
-		final long i2;
-		i1 = ((Number) BeanUtils.getProperty(bean1, orderName)).longValue();
-		i2 = ((Number) BeanUtils.getProperty(bean2, orderName)).longValue();
+		final String orderName = order.getName();
+		final int i1 = ((Number) BeanUtils.getProperty(bean1, orderName)).intValue();
+		final int i2 = ((Number) BeanUtils.getProperty(bean2, orderName)).intValue();
 		if (i1 == i2) {
 			return null;
 		}
 
-		final long max = Math.max(i1, i2);
-		final long min = Math.min(i1, i2);
+		final int max = Math.max(i1, i2);
+		final int min = Math.min(i1, i2);
 
-		final String tn = getEntityTable().getName();
+		final ArrayList<Object> params = new ArrayList<Object>();
+		params.add(min);
+		params.add(max);
+
+		final String orderSqlName = order.getSqlName();
 		final StringBuilder sb = new StringBuilder();
-		sb.append("update ").append(tn).append(" set ");
-		sb.append(orderSqlName).append("=? where ").append(orderSqlName).append("=?");
-		final String sql = sb.toString();
-		sb.setLength(0);
-		sb.append("update ").append(tn).append(" set ").append(orderSqlName);
-		sb.append("=").append(orderSqlName).append("+? where ");
-		sb.append(orderSqlName).append(">? and ").append(orderSqlName).append("<?");
-		final String sql2 = sb.toString();
-		if (order.getOrder() == EOrder.asc && up) {
-			executeUpdate(new SQLValue(sql, -1, min));
-			executeUpdate(new SQLValue(sql, min, max));
-			executeUpdate(new SQLValue(sql2, 1, min, max));
-			executeUpdate(new SQLValue(sql, min + 1, -1));
-		} else {
-			executeUpdate(new SQLValue(sql, -1, max));
-			executeUpdate(new SQLValue(sql, max, min));
-			executeUpdate(new SQLValue(sql2, -1, min, max));
-			executeUpdate(new SQLValue(sql, max - 1, -1));
+		sb.append(orderSqlName).append(">=? and ").append(orderSqlName).append("<=?");
+		if (bean1 instanceof ITreeBeanAware) {
+			final Object parentId = ((ITreeBeanAware) bean1).getParentId();
+			final String sqlPID = TableColumn.getTableColumns(bean1.getClass()).get("parentId")
+					.getSqlName();
+			if (parentId == null) {
+				sb.append(" and ").append(sqlPID).append(" is null");
+			} else {
+				sb.append(" and ").append(sqlPID).append("=?");
+				params.add(parentId);
+			}
+		}
+		sb.append(" order by ").append(orderSqlName);
+		EOrder eo;
+		if ((eo = order.getOrder()) != EOrder.normal) {
+			sb.append(" ").append(eo);
 		}
 
-		return new long[] { min, max };
+		final List<T> updates = DataQueryUtils.toList(queryBeans(new ExpressionValue(sb.toString(),
+				params.toArray())));
+
+		final int size = updates.size();
+		final Object[] oInt = new Object[size];
+		for (int i = 0; i < size; i++) {
+			oInt[i] = BeanUtils.getProperty(updates.get(i), orderName);
+		}
+
+		final String[] _columns = new String[] { orderSqlName };
+		if (!up) {
+			for (int i = 0; i < size; i++) {
+				// 下一个替换上一个
+				int j = i + 1;
+				if (j == size) {
+					j = 0;
+				}
+				final T t = updates.get(j);
+				BeanUtils.setProperty(t, orderName, oInt[i]);
+				update(_columns, t);
+			}
+		} else {
+			for (int i = size - 1; i >= 0; i--) {
+				// 上一个替换下一个
+				int j = i - 1;
+				if (j == -1) {
+					j = size - 1;
+				}
+				final T t = updates.get(j);
+				BeanUtils.setProperty(t, orderName, oInt[i]);
+				update(_columns, t);
+			}
+		}
+		return updates;
 	}
 
 	@Override

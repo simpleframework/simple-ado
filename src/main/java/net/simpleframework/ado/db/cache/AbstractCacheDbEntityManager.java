@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.simpleframework.ado.ADOException;
 import net.simpleframework.ado.IParamsValue;
 import net.simpleframework.ado.IParamsValue.AbstractParamsValue;
 import net.simpleframework.ado.db.BeanWrapper;
@@ -14,9 +13,7 @@ import net.simpleframework.ado.db.DbDataQuery;
 import net.simpleframework.ado.db.DbEntityManager;
 import net.simpleframework.ado.db.DbEntityTable;
 import net.simpleframework.ado.db.IDbDataQuery;
-import net.simpleframework.ado.db.common.ExpressionValue;
 import net.simpleframework.ado.db.common.SQLValue;
-import net.simpleframework.ado.db.common.TableColumn;
 import net.simpleframework.ado.db.event.IDbEntityListener;
 import net.simpleframework.ado.db.event.IDbListener;
 import net.simpleframework.ado.db.jdbc.IJdbcProvider;
@@ -228,33 +225,6 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 			reset();
 		}
 		return ret;
-	}
-
-	@Override
-	public Object exchange(final Object o1, final Object o2, final TableColumn order,
-			final boolean up) {
-		final long[] ret = (long[]) super.exchange(o1, o2, order, up);
-		if (ret == null) {
-			return null;
-		}
-		final String orderName = order.getSqlName();
-		final StringBuilder sb = new StringBuilder();
-		sb.append(orderName).append(">=? and ").append(orderName).append("<=?");
-		try {
-			final IDbDataQuery<Map<String, Object>> qs = queryMapSet(new ExpressionValue(
-					sb.toString(), ret[0], ret[1]));
-			Map<String, Object> mObj;
-			while ((mObj = qs.next()) != null) {
-				final String key = toUniqueString(mObj);
-				if (key != null) {
-					removeCache(key);
-				}
-			}
-			return ret;
-		} catch (final Throwable th) {
-			reset();
-			throw ADOException.of(th);
-		}
 	}
 
 	/************************* transaction ************************/
