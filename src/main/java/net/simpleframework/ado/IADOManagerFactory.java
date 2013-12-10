@@ -11,14 +11,6 @@ import java.util.Collection;
 public interface IADOManagerFactory {
 
 	/**
-	 * 获取实体管理类
-	 * 
-	 * @param beanClass
-	 * @return
-	 */
-	// IADOManager getEntityManager(final Class<?> beanClass);
-
-	/**
 	 * 获取所有的实体管理器
 	 * 
 	 * @return
