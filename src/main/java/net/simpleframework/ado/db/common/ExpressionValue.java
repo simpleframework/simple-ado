@@ -47,7 +47,9 @@ public class ExpressionValue extends UniqueValue {
 
 	public static ExpressionValue toExpressionValue(final FilterItem item) {
 		final Object val = item.getValue();
-		if (val == null) {
+		final EFilterRelation relation = item.getRelation();
+		if ((relation != EFilterRelation.isNull && relation != EFilterRelation.isNotNull)
+				&& val == null) {
 			return null;
 		}
 		ArrayList<Object> al = null;
@@ -109,7 +111,7 @@ public class ExpressionValue extends UniqueValue {
 		sql.append(item.getColumn()).append(" ").append(relation);
 		if (relation == EFilterRelation.like) {
 			sql.append(" '%").append(val).append("%'");
-		} else if (relation != EFilterRelation.isNull || relation != EFilterRelation.isNotNull) {
+		} else if (relation != EFilterRelation.isNull && relation != EFilterRelation.isNotNull) {
 			sql.append(" ?");
 			al.add(val);
 		}
