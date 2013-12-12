@@ -62,6 +62,10 @@ public class DbManagerFactory extends ObjectEx implements IADOManagerFactory {
 		return eManagerCache.values();
 	}
 
+	// public DbEntityTable getEntityTable(final Class<?> beanClass) {
+	//
+	// }
+
 	public DbEntityTable getEntityTable(final String name) {
 		for (final IDbEntityManager<?> mgr : allEntityManager()) {
 			final DbEntityTable eTbl = mgr.getEntityTable();
