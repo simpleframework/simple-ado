@@ -119,9 +119,8 @@ public abstract class AbstractDbManager extends AbstractADOManager implements ID
 	@Override
 	public int executeTransaction(final IDbListener l, final SQLValue... sqlValues) {
 		return doExecuteTransaction(new TransactionObjectCallback<Integer>() {
-
 			@Override
-			public Integer onTransactionCallback() throws ADOException {
+			public Integer onTransactionCallback() {
 				return execute(l, sqlValues);
 			}
 		});
