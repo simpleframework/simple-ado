@@ -20,8 +20,8 @@ import java.util.Calendar;
 import java.util.Properties;
 
 import net.simpleframework.ado.EOrder;
+import net.simpleframework.ado.db.DbTableColumn;
 import net.simpleframework.ado.db.common.JSqlParser;
-import net.simpleframework.ado.db.common.TableColumn;
 import net.simpleframework.common.ClassUtils;
 import net.simpleframework.common.Convert;
 import net.simpleframework.common.FileUtils;
@@ -60,7 +60,7 @@ public class DefaultJdbcDialect extends ObjectEx implements IJdbcDialect {
 	}
 
 	@Override
-	public String toOrderBySQL(final String sql, final TableColumn... columns) {
+	public String toOrderBySQL(final String sql, final DbTableColumn... columns) {
 		final StringBuilder sb = new StringBuilder();
 		final String dbType = getDbType();
 		if (StringUtils.hasText(dbType)) {
@@ -78,7 +78,7 @@ public class DefaultJdbcDialect extends ObjectEx implements IJdbcDialect {
 		if (sb.length() == 0) {
 			final StringBuilder sb2 = new StringBuilder();
 			int i = 0;
-			for (final TableColumn dbColumn : columns) {
+			for (final DbTableColumn dbColumn : columns) {
 				if (dbColumn.getOrder() == EOrder.normal) {
 					continue;
 				}

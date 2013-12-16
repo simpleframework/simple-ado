@@ -3,7 +3,6 @@ package net.simpleframework.ado.db;
 import java.util.Map;
 
 import net.simpleframework.ado.IParamsValue;
-import net.simpleframework.ado.db.common.TableColumn;
 import net.simpleframework.ado.db.event.IDbEntityListener;
 
 /**
@@ -131,5 +130,5 @@ public interface IDbEntityManager<T> extends IDbManager {
 
 	int max(String column, IParamsValue paramsValue);
 
-	Object exchange(T bean1, T bean2, TableColumn order, boolean up);
+	Object exchange(T bean1, T bean2, DbTableColumn order, boolean up);
 }

@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Map;
 
 import net.simpleframework.ado.ColumnData;
-import net.simpleframework.ado.db.common.TableColumn;
 import net.simpleframework.common.StringUtils;
 
 /**
@@ -63,20 +62,20 @@ public class DbEntityTable implements Serializable {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Map<String, TableColumn> getTableColumns() {
+	public Map<String, DbTableColumn> getTableColumns() {
 		final Class<?> beanClass = getBeanClass();
-		return beanClass == null ? Collections.EMPTY_MAP : TableColumn
+		return beanClass == null ? Collections.EMPTY_MAP : DbTableColumn
 				.getTableColumns(getBeanClass());
 	}
 
 	public String getSqlName(final String propertyName) {
-		final TableColumn tCol = getTableColumns().get(propertyName);
-		return tCol != null ? tCol.getSqlName() : propertyName;
+		final DbTableColumn tCol = getTableColumns().get(propertyName);
+		return tCol != null ? tCol.getAlias() : propertyName;
 	}
 
 	public String getBeanPropertyName(final String sqlName) {
-		for (final TableColumn tCol : getTableColumns().values()) {
-			if (sqlName.equalsIgnoreCase(tCol.getSqlName())) {
+		for (final DbTableColumn tCol : getTableColumns().values()) {
+			if (sqlName.equalsIgnoreCase(tCol.getAlias())) {
 				return tCol.getName();
 			}
 		}

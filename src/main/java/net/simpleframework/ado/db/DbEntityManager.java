@@ -18,7 +18,6 @@ import net.simpleframework.ado.bean.ITreeBeanAware;
 import net.simpleframework.ado.db.common.EntityInterceptor;
 import net.simpleframework.ado.db.common.ExpressionValue;
 import net.simpleframework.ado.db.common.SQLValue;
-import net.simpleframework.ado.db.common.TableColumn;
 import net.simpleframework.ado.db.event.IDbEntityListener;
 import net.simpleframework.ado.db.jdbc.IQueryExtractor;
 import net.simpleframework.ado.query.DataQueryUtils;
@@ -403,7 +402,7 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Object exchange(final T bean1, final T bean2, final TableColumn order, final boolean up) {
+	public Object exchange(final T bean1, final T bean2, final DbTableColumn order, final boolean up) {
 		if (bean1 == null || bean2 == null || order == null) {
 			return null;
 		}
@@ -422,13 +421,13 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 		params.add(min);
 		params.add(max);
 
-		final String orderSqlName = order.getSqlName();
+		final String orderSqlName = order.getAlias();
 		final StringBuilder sb = new StringBuilder();
 		sb.append(orderSqlName).append(">=? and ").append(orderSqlName).append("<=?");
 		if (bean1 instanceof ITreeBeanAware) {
 			final Object parentId = ((ITreeBeanAware) bean1).getParentId();
-			final String sqlPID = TableColumn.getTableColumns(bean1.getClass()).get("parentId")
-					.getSqlName();
+			final String sqlPID = DbTableColumn.getTableColumns(bean1.getClass()).get("parentId")
+					.getAlias();
 			if (parentId == null) {
 				sb.append(" and ").append(sqlPID).append(" is null");
 			} else {

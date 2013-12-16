@@ -4,7 +4,6 @@ import javax.sql.DataSource;
 
 import net.simpleframework.ado.db.common.ExpressionValue;
 import net.simpleframework.ado.db.common.SQLValue;
-import net.simpleframework.ado.db.common.TableColumn;
 import net.simpleframework.ado.query.IDataQuery;
 
 /**
@@ -41,7 +40,7 @@ public interface IDbDataQuery<T> extends IDataQuery<T> {
 	 * 
 	 * @param columns
 	 */
-	void addOrderBy(TableColumn... columns);
+	void addOrderBy(DbTableColumn... columns);
 
 	IDbDataQuery<T> setResultSetType(int resultSetType);
 

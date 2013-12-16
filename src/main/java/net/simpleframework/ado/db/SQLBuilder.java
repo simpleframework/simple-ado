@@ -10,7 +10,6 @@ import net.simpleframework.ado.ColumnData;
 import net.simpleframework.ado.EOrder;
 import net.simpleframework.ado.db.common.SQLValue;
 import net.simpleframework.ado.db.common.SqlUtils;
-import net.simpleframework.ado.db.common.TableColumn;
 import net.simpleframework.common.BeanUtils;
 import net.simpleframework.common.StringUtils;
 
@@ -29,7 +28,7 @@ public abstract class SQLBuilder {
 			sb.append("*");
 		} else {
 			int i = 0;
-			final Map<String, TableColumn> tblColumns = dbTable.getTableColumns();
+			final Map<String, DbTableColumn> tblColumns = dbTable.getTableColumns();
 			for (final String column : columns) {
 				if (!StringUtils.hasText(column)) {
 					continue;
@@ -37,9 +36,9 @@ public abstract class SQLBuilder {
 				if (i++ > 0) {
 					sb.append(",");
 				}
-				final TableColumn tCol = tblColumns.get(column);
+				final DbTableColumn tCol = tblColumns.get(column);
 				if (tCol != null) {
-					final String sqlName = tCol.getSqlName();
+					final String sqlName = tCol.getAlias();
 					sb.append(sqlName);
 					final String name = tCol.getName();
 					if (!sqlName.equals(name)) {
@@ -70,14 +69,14 @@ public abstract class SQLBuilder {
 
 	static StringBuilder buildUniqueColumns(final StringBuilder sb, final DbEntityTable dbTable) {
 		int i = 0;
-		final Map<String, TableColumn> tblColumns = dbTable.getTableColumns();
+		final Map<String, DbTableColumn> tblColumns = dbTable.getTableColumns();
 		for (final String uniqueColumn : dbTable.getUniqueColumns()) {
 			if (i++ > 0) {
 				sb.append(" and ");
 			}
-			final TableColumn tCol = tblColumns.get(uniqueColumn);
+			final DbTableColumn tCol = tblColumns.get(uniqueColumn);
 			if (tCol != null) {
-				sb.append(tCol.getSqlName());
+				sb.append(tCol.getAlias());
 			} else {
 				sb.append(uniqueColumn);
 			}
@@ -104,7 +103,7 @@ public abstract class SQLBuilder {
 			final ColumnData col = dbTable.getDefaultOrder();
 			if (col != null) {
 				if (expression.toLowerCase().indexOf("order by") == -1) {
-					sb.append(" order by ").append(col.getSqlName());
+					sb.append(" order by ").append(col.getAlias());
 					final EOrder o = col.getOrder();
 					if (o != EOrder.normal) {
 						sb.append(" ").append(o);
@@ -146,11 +145,11 @@ public abstract class SQLBuilder {
 		sb.append("insert into ").append(dbTable.getName()).append("(");
 		final List<Object> vl = new ArrayList<Object>();
 		int size = 0;
-		for (final TableColumn tCol : dbTable.getTableColumns().values()) {
+		for (final DbTableColumn tCol : dbTable.getTableColumns().values()) {
 			if (size > 0) {
 				sb.append(",");
 			}
-			sb.append(tCol.getSqlName());
+			sb.append(tCol.getAlias());
 			vl.add(getVal(object, tCol.getName()));
 			size++;
 		}
@@ -186,9 +185,9 @@ public abstract class SQLBuilder {
 			}
 			String key;
 			Object val;
-			if (oCol instanceof TableColumn) {
-				key = ((TableColumn) oCol).getSqlName();
-				val = getVal(object, ((TableColumn) oCol).getName());
+			if (oCol instanceof DbTableColumn) {
+				key = ((DbTableColumn) oCol).getAlias();
+				val = getVal(object, ((DbTableColumn) oCol).getName());
 			} else {
 				key = (String) oCol;
 				val = getVal(object, dbTable.getBeanPropertyName(key));

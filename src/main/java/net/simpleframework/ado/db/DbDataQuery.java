@@ -14,7 +14,6 @@ import javax.sql.DataSource;
 import net.simpleframework.ado.ADOException;
 import net.simpleframework.ado.db.common.ExpressionValue;
 import net.simpleframework.ado.db.common.SQLValue;
-import net.simpleframework.ado.db.common.TableColumn;
 import net.simpleframework.ado.db.jdbc.IJdbcProvider;
 import net.simpleframework.ado.db.jdbc.IQueryCallback;
 import net.simpleframework.ado.db.jdbc.IQueryExtractor;
@@ -236,7 +235,7 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 	}
 
 	@Override
-	public void addOrderBy(final TableColumn... columns) {
+	public void addOrderBy(final DbTableColumn... columns) {
 		if (columns == null) {
 			return;
 		}

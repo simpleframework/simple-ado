@@ -52,6 +52,13 @@ public class DbManagerFactory extends ObjectEx implements IADOManagerFactory {
 			final Class<?> beanClass = eTable.getBeanClass();
 			final DbEntityManager<?> eManager = (DbEntityManager<?>) createEntityManager(beanClass);
 			eManager.setEntityTable(eTable).setDbManagerFactory(this);
+			// 只注册最终子类
+			for (final Class<?> beanClass2 : eManagerCache.keySet()) {
+				if (!beanClass2.equals(beanClass) && beanClass2.isAssignableFrom(beanClass)) {
+					eManagerCache.remove(beanClass);
+					break;
+				}
+			}
 			eManagerCache.put(beanClass, eManager);
 		}
 		return this;
@@ -62,9 +69,10 @@ public class DbManagerFactory extends ObjectEx implements IADOManagerFactory {
 		return eManagerCache.values();
 	}
 
-	// public DbEntityTable getEntityTable(final Class<?> beanClass) {
-	//
-	// }
+	public DbEntityTable getEntityTable(final Class<?> beanClass) {
+		final IDbEntityManager<?> mgr = eManagerCache.get(beanClass);
+		return mgr != null ? mgr.getEntityTable() : null;
+	}
 
 	public DbEntityTable getEntityTable(final String name) {
 		for (final IDbEntityManager<?> mgr : allEntityManager()) {

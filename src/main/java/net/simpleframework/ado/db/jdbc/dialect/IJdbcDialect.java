@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import net.simpleframework.ado.db.common.TableColumn;
+import net.simpleframework.ado.db.DbTableColumn;
 
 /**
  * Licensed under the Apache License, Version 2.0
@@ -29,7 +29,7 @@ public interface IJdbcDialect {
 	 * @param columns
 	 * @return
 	 */
-	String toOrderBySQL(String sql, TableColumn... columns);
+	String toOrderBySQL(String sql, DbTableColumn... columns);
 
 	/**
 	 * sql加上条件

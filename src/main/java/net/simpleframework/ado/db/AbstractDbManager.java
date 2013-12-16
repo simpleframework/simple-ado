@@ -10,7 +10,6 @@ import net.simpleframework.ado.ADOException;
 import net.simpleframework.ado.AbstractADOManager;
 import net.simpleframework.ado.IADOListener;
 import net.simpleframework.ado.db.common.SQLValue;
-import net.simpleframework.ado.db.common.TableColumn;
 import net.simpleframework.ado.db.event.IDbListener;
 import net.simpleframework.ado.db.jdbc.DatabaseMeta;
 import net.simpleframework.ado.db.jdbc.IBatchValueSetter;
@@ -126,11 +125,11 @@ public abstract class AbstractDbManager extends AbstractADOManager implements ID
 		});
 	}
 
-	protected TableColumn[] getColumns(final String[] columns) {
+	protected DbTableColumn[] getColumns(final String[] columns) {
 		if (columns != null) {
-			final TableColumn[] objects = new TableColumn[columns.length];
+			final DbTableColumn[] objects = new DbTableColumn[columns.length];
 			for (int i = 0; i < columns.length; i++) {
-				objects[i] = new TableColumn(columns[i]);
+				objects[i] = new DbTableColumn(columns[i]);
 			}
 			return objects;
 		} else {

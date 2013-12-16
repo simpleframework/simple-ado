@@ -6,6 +6,7 @@ import java.util.Map;
 
 import net.simpleframework.ado.EOrder;
 import net.simpleframework.ado.db.DbEntityTable;
+import net.simpleframework.ado.db.DbTableColumn;
 import net.simpleframework.ado.db.jdbc.DatabaseMeta;
 import net.simpleframework.common.BeanUtils;
 import net.simpleframework.common.StringUtils;
@@ -81,7 +82,7 @@ public abstract class JSqlParser {
 	}
 
 	public static String addOrderBy(final String sql, final String dbType,
-			final TableColumn... columns) {
+			final DbTableColumn... columns) {
 		if (columns == null || columns.length == 0) {
 			return sql;
 		}
@@ -103,8 +104,8 @@ public abstract class JSqlParser {
 
 		final List<SQLSelectOrderByItem> items = orderBy.getItems();
 		for (int i = columns.length - 1; i >= 0; i--) {
-			final TableColumn dbColumn = columns[i];
-			final SQLExpr expr = new SQLIdentifierExpr(dbColumn.getSqlName());
+			final DbTableColumn dbColumn = columns[i];
+			final SQLExpr expr = new SQLIdentifierExpr(dbColumn.getAlias());
 			SQLExpr expr2 = expr;
 			final DbEntityTable dbTable = dbColumn.getTable();
 			if (dbTable != null) {

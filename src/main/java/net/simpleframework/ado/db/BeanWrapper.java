@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import net.simpleframework.ado.db.common.TableColumn;
 import net.simpleframework.ado.db.jdbc.IJdbcProvider;
 import net.simpleframework.ado.db.jdbc.JdbcUtils;
 import net.simpleframework.common.BeanUtils;
@@ -29,14 +28,14 @@ public class BeanWrapper<T> extends ObjectEx {
 		collection = new ArrayList<PropertyCache>(fields.size());
 
 		for (final String field : fields) {
-			final TableColumn col = TableColumn.getTableColumns(beanClass).get(field);
+			final DbTableColumn col = DbTableColumn.getTableColumns(beanClass).get(field);
 			if (col == null) {
 				continue;
 			}
 			if (columns != null && columns.length > 0) {
 				boolean find = false;
 				for (final String column : columns) {
-					if (col.getName().equals(column) || col.getSqlName().equals(column)) {
+					if (col.getName().equals(column) || col.getAlias().equals(column)) {
 						find = true;
 						break;
 					}
@@ -86,7 +85,7 @@ public class BeanWrapper<T> extends ObjectEx {
 	private class PropertyCache {
 		String propertyName;
 
-		TableColumn dbColumn;
+		DbTableColumn dbColumn;
 
 		int sqlColumnIndex;
 	}
