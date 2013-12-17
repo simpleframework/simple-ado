@@ -26,7 +26,6 @@ import net.simpleframework.ado.trans.TransactionObjectCallback;
 import net.simpleframework.common.BeanUtils;
 import net.simpleframework.common.ID;
 import net.simpleframework.common.coll.ArrayUtils;
-import net.simpleframework.common.object.ObjectFactory;
 
 /**
  * Licensed under the Apache License, Version 2.0
@@ -163,7 +162,7 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 			for (final String lClass : interceptor.listenerTypes()) {
 				IDbEntityListener l2 = null;
 				try {
-					l2 = (IDbEntityListener) ObjectFactory.singleton(lClass);
+					l2 = (IDbEntityListener) singleton(lClass);
 				} catch (final Exception e) {
 				}
 				if (l2 != null) {
