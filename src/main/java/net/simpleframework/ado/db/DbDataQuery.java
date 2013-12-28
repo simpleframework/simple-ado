@@ -7,6 +7,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -198,7 +199,8 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 						}
 					}
 				}, getResultSetType(), getResultSetConcurrency());
-				bean = rVal.iterator().next();
+				final Iterator<T> it = rVal.iterator();
+				bean = it.hasNext() ? it.next() : null;
 			}
 		}
 
