@@ -19,7 +19,7 @@ public class DbEntityTable implements Serializable {
 
 	private final String name;
 
-	private final String[] uniqueColumns;
+	private String[] uniqueColumns;
 
 	private boolean noCache;
 
@@ -37,6 +37,11 @@ public class DbEntityTable implements Serializable {
 
 	public String[] getUniqueColumns() {
 		return uniqueColumns;
+	}
+
+	public DbEntityTable setUniqueColumns(final String... uniqueColumns) {
+		this.uniqueColumns = uniqueColumns;
+		return this;
 	}
 
 	public boolean isNoCache() {
