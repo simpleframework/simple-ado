@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -335,6 +334,7 @@ public class DefaultJdbcDialect extends ObjectEx implements IJdbcDialect {
 				if (inValue instanceof byte[]) {
 					ps.setBytes(paramIndex, (byte[]) inValue);
 				} else if (inValue instanceof InputStream) {
+					initPreparedStatementMethod(ps.getClass());
 					if (setBinaryStreamMethod != null) {
 						ClassUtils.invoke(setBinaryStreamMethod, ps, paramIndex, inValue);
 					} else if (inValue instanceof ByteArrayInputStream) {
@@ -367,6 +367,7 @@ public class DefaultJdbcDialect extends ObjectEx implements IJdbcDialect {
 						ps.setNull(paramIndex, sqlType);
 					}
 				} else if (inValue instanceof Reader) {
+					initPreparedStatementMethod(ps.getClass());
 					if (setCharacterStreamMethod != null) {
 						ClassUtils.invoke(setCharacterStreamMethod, ps, paramIndex, inValue);
 					} else if (inValue instanceof StringReader) {
@@ -388,19 +389,17 @@ public class DefaultJdbcDialect extends ObjectEx implements IJdbcDialect {
 	}
 
 	private Method setBinaryStreamMethod, setCharacterStreamMethod;
-	{
+	private boolean _bPreparedStatementMethod = false;
+
+	private void initPreparedStatementMethod(final Class<? extends PreparedStatement> pClass) {
+		if (_bPreparedStatementMethod) {
+			return;
+		}
 		try {
 			// jdbc4
-			setBinaryStreamMethod = PreparedStatement.class.getMethod("setBinaryStream", int.class,
-					InputStream.class);
-			if (Modifier.isAbstract(setBinaryStreamMethod.getModifiers())) {
-				setBinaryStreamMethod = null;
-			}
-			setCharacterStreamMethod = PreparedStatement.class.getMethod("setCharacterStream",
-					int.class, Reader.class);
-			if (Modifier.isAbstract(setCharacterStreamMethod.getModifiers())) {
-				setCharacterStreamMethod = null;
-			}
+			setBinaryStreamMethod = pClass.getMethod("setBinaryStream", int.class, InputStream.class);
+			setCharacterStreamMethod = pClass.getMethod("setCharacterStream", int.class, Reader.class);
+			_bPreparedStatementMethod = true;
 		} catch (final NoSuchMethodException e) {
 		}
 	}
