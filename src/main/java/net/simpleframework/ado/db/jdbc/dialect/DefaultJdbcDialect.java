@@ -21,6 +21,7 @@ import java.util.Properties;
 import net.simpleframework.ado.EOrder;
 import net.simpleframework.ado.db.DbTableColumn;
 import net.simpleframework.ado.db.common.JSqlParser;
+import net.simpleframework.ado.db.common.ParamVal;
 import net.simpleframework.common.ClassUtils;
 import net.simpleframework.common.Convert;
 import net.simpleframework.common.FileUtils;
@@ -129,11 +130,6 @@ public class DefaultJdbcDialect extends ObjectEx implements IJdbcDialect {
 		return ResultSet.TYPE_FORWARD_ONLY;
 	}
 
-	@Override
-	public Object getResultSetValue(final ResultSet rs, final int columnIndex) throws SQLException {
-		return getResultSetValue(rs, columnIndex, null);
-	}
-
 	protected Object getBlobObject(final ResultSet rs, final int columnIndex) throws SQLException {
 		final Blob blob = rs.getBlob(columnIndex);
 		return blob != null ? blob.getBinaryStream() : null;
@@ -142,6 +138,11 @@ public class DefaultJdbcDialect extends ObjectEx implements IJdbcDialect {
 	protected Object getClobObject(final ResultSet rs, final int columnIndex) throws SQLException {
 		final Clob clob = rs.getClob(columnIndex);
 		return clob != null ? clob.getCharacterStream() : null;
+	}
+
+	@Override
+	public Object getResultSetValue(final ResultSet rs, final int columnIndex) throws SQLException {
+		return getResultSetValue(rs, columnIndex, null);
 	}
 
 	@Override
@@ -259,7 +260,12 @@ public class DefaultJdbcDialect extends ObjectEx implements IJdbcDialect {
 	@Override
 	public void setParameterValue(final PreparedStatement ps, final int paramIndex,
 			final Object inValue) throws SQLException, IOException {
-		final int sqlType = getParameterType(inValue == null ? null : inValue.getClass());
+		final int sqlType;
+		if (inValue instanceof ParamVal) {
+			sqlType = ((ParamVal) inValue).getSqlType();
+		} else {
+			sqlType = getParameterType(inValue == null ? null : inValue.getClass());
+		}
 		boolean object = false;
 		if (inValue == null) {
 			ps.setNull(paramIndex, sqlType);
