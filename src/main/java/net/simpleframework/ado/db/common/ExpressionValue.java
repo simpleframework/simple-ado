@@ -16,22 +16,30 @@ import net.simpleframework.common.TimePeriod;
  * @author 陈侃(cknet@126.com, 13910090885) https://github.com/simpleframework
  *         http://www.simpleframework.net
  */
-public class ExpressionValue extends AbstractParamsValue {
-	private static final long serialVersionUID = 8251357074671323990L;
+public class ExpressionValue extends AbstractParamsValue<ExpressionValue> {
 
-	private String expression;
+	private final StringBuilder _expression = new StringBuilder();
+
+	public ExpressionValue() {
+	}
 
 	public ExpressionValue(final String expression, final Object... values) {
 		addValues(values);
-		this.expression = StringUtils.text(expression, "1=1");
+		_expression.append(StringUtils.text(expression, "1=1"));
 	}
 
 	public String getExpression() {
-		return expression;
+		return _expression.toString();
 	}
 
 	public void setExpression(final String expression) {
-		this.expression = expression;
+		_expression.setLength(0);
+		_expression.append(expression);
+	}
+
+	public ExpressionValue addExpression(final Object expression) {
+		_expression.append(expression);
+		return this;
 	}
 
 	@Override
@@ -116,4 +124,6 @@ public class ExpressionValue extends AbstractParamsValue {
 			al.add(val);
 		}
 	}
+
+	private static final long serialVersionUID = 8251357074671323990L;
 }
