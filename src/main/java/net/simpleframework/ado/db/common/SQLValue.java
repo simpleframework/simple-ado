@@ -20,7 +20,7 @@ public class SQLValue extends AbstractParamsValue {
 
 	public SQLValue(final String sql, final Object... values) {
 		this.sql = sql;
-		setValues(values);
+		addValues(values);
 	}
 
 	public String getSql() {

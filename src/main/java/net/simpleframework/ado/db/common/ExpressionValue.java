@@ -5,7 +5,7 @@ import java.util.Date;
 
 import net.simpleframework.ado.EFilterRelation;
 import net.simpleframework.ado.FilterItem;
-import net.simpleframework.ado.UniqueValue;
+import net.simpleframework.ado.IParamsValue.AbstractParamsValue;
 import net.simpleframework.common.ETimePeriod;
 import net.simpleframework.common.StringUtils;
 import net.simpleframework.common.TimePeriod;
@@ -16,13 +16,13 @@ import net.simpleframework.common.TimePeriod;
  * @author 陈侃(cknet@126.com, 13910090885) https://github.com/simpleframework
  *         http://www.simpleframework.net
  */
-public class ExpressionValue extends UniqueValue {
+public class ExpressionValue extends AbstractParamsValue {
 	private static final long serialVersionUID = 8251357074671323990L;
 
 	private String expression;
 
 	public ExpressionValue(final String expression, final Object... values) {
-		super(values);
+		addValues(values);
 		this.expression = StringUtils.text(expression, "1=1");
 	}
 
