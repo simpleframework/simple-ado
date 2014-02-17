@@ -1,7 +1,6 @@
 package net.simpleframework.ado.db;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +11,7 @@ import net.simpleframework.ado.db.common.SQLValue;
 import net.simpleframework.ado.db.common.SqlUtils;
 import net.simpleframework.common.BeanUtils;
 import net.simpleframework.common.StringUtils;
+import net.simpleframework.common.coll.ArrayUtils;
 
 /**
  * Licensed under the Apache License, Version 2.0
@@ -175,8 +175,8 @@ public abstract class SQLBuilder {
 		final StringBuilder sb = new StringBuilder();
 		sb.append("update ").append(dbTable.getName()).append(" set ");
 
-		final Collection<?> coll = (columns != null && columns.length > 0) ? Arrays.asList(columns)
-				: dbTable.getTableColumns().values();
+		final Collection<?> coll = (columns != null && columns.length > 0) ? ArrayUtils
+				.asList(columns) : dbTable.getTableColumns().values();
 
 		int i = 0;
 		for (final Object oCol : coll) {
