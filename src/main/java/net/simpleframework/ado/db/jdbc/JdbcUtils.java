@@ -11,7 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.sql.DataSource;
 
 import net.simpleframework.ado.ADOException;
-import net.simpleframework.ado.db.common.JSqlParser;
 import net.simpleframework.common.logger.Log;
 import net.simpleframework.common.logger.LogFactory;
 
@@ -120,9 +119,5 @@ public abstract class JdbcUtils {
 				log.warn(e);
 			}
 		}
-	}
-
-	public static String format(final String sql, final DataSource dataSource) {
-		return JSqlParser.format(sql, getDatabaseMetaData(dataSource).getDatabaseProductName());
 	}
 }

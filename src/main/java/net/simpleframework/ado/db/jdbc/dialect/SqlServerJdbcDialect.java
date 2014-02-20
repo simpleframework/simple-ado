@@ -1,6 +1,6 @@
 package net.simpleframework.ado.db.jdbc.dialect;
 
-import net.simpleframework.ado.db.common.JSqlParser;
+import net.simpleframework.ado.db.JSqlParser;
 import net.simpleframework.ado.db.jdbc.DatabaseMeta;
 
 /**

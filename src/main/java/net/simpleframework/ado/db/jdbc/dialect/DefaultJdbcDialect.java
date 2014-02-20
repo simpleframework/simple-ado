@@ -20,7 +20,7 @@ import java.util.Properties;
 
 import net.simpleframework.ado.EOrder;
 import net.simpleframework.ado.db.DbTableColumn;
-import net.simpleframework.ado.db.common.JSqlParser;
+import net.simpleframework.ado.db.JSqlParser;
 import net.simpleframework.ado.db.common.ParamVal;
 import net.simpleframework.common.ClassUtils;
 import net.simpleframework.common.Convert;

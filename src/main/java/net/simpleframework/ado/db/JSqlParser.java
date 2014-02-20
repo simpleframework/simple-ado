@@ -1,13 +1,14 @@
-package net.simpleframework.ado.db.common;
+package net.simpleframework.ado.db;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import net.simpleframework.ado.EOrder;
-import net.simpleframework.ado.db.DbEntityTable;
-import net.simpleframework.ado.db.DbTableColumn;
 import net.simpleframework.ado.db.jdbc.DatabaseMeta;
+import net.simpleframework.ado.db.jdbc.JdbcUtils;
 import net.simpleframework.common.BeanUtils;
 import net.simpleframework.common.StringUtils;
 import net.simpleframework.common.coll.LRUMap;
@@ -35,6 +36,11 @@ import com.alibaba.druid.sql.parser.SQLParserUtils;
  *         http://www.simpleframework.net
  */
 public abstract class JSqlParser {
+
+	public static String format(final String sql, final DataSource dataSource) {
+		return format(sql, JdbcUtils.getDatabaseMetaData(dataSource).getDatabaseProductName());
+	}
+
 	public static String format(final String sql, final String db) {
 		return SQLUtils.format(sql, db);
 	}
