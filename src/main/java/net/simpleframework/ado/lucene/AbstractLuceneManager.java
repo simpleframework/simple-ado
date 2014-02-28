@@ -42,7 +42,7 @@ import org.apache.lucene.util.Version;
  *         http://www.simpleframework.net
  */
 public abstract class AbstractLuceneManager extends AbstractADOManager implements ILuceneManager {
-	final Version version = Version.LUCENE_43;
+	final Version version = Version.LUCENE_47;
 
 	final List<String> queryFieldsCache = new ArrayList<String>();
 
