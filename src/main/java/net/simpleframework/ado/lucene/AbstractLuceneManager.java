@@ -197,9 +197,11 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 
 	@Override
 	public String[] getQueryTokens(final String queryString) {
+		TokenStream tokenStream = null;
 		try {
-			final TokenStream tokenStream = getDefaultAnalyzer().tokenStream("QUERY_TOKENS",
+			tokenStream = getDefaultAnalyzer().tokenStream("QUERY_TOKENS",
 					new StringReader(queryString));
+			tokenStream.reset();
 			final ArrayList<String> al = new ArrayList<String>();
 			while (tokenStream.incrementToken()) {
 				final String term = tokenStream.getAttribute(CharTermAttribute.class).toString();
@@ -210,9 +212,17 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 			if (al.size() == 0) {
 				al.add(queryString);
 			}
+
 			return al.toArray(new String[al.size()]);
 		} catch (final IOException e) {
 			throw ADOException.of(e);
+		} finally {
+			if (tokenStream != null) {
+				try {
+					tokenStream.close();
+				} catch (final IOException e) {
+				}
+			}
 		}
 	}
 
