@@ -136,7 +136,7 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 				event.onExecute(connection);
 			}
 			final T t = callback.onTransactionCallback();
-			connection.commit();
+			JdbcTransactionUtils.commit(connection);
 			return t;
 		} catch (final Throwable th) {
 			try {

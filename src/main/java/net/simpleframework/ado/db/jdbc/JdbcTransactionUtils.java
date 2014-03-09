@@ -18,31 +18,51 @@ import net.simpleframework.common.logger.LogFactory;
  */
 public abstract class JdbcTransactionUtils {
 
-	private static ThreadLocal<Connection> connections;
-	static {
-		connections = new ThreadLocal<Connection>();
-	}
+	private static ThreadLocal<Connection> CONNECTIONS = new ThreadLocal<Connection>();
+
+	/* 标识当前连接在嵌套 */
+	private static ThreadLocal<Boolean> NESTED = new ThreadLocal<Boolean>();
 
 	static Connection begin(final DataSource dataSource) throws SQLException {
 		final Connection connection = getConnection(dataSource);
+		if (isBeginTransaction(connection)) {
+			/* 如果存在正在运行的事务连接,直接返回 */
+			NESTED.set(Boolean.TRUE);
+			return connection;
+		}
 		if (connection.getAutoCommit()) {
 			connection.setAutoCommit(false);
 		}
-		connections.set(connection);
+		CONNECTIONS.set(connection);
 		return connection;
 	}
 
-	static void end(final Connection connection) {
-		connections.remove();
-		closeAll(connection, null, null);
+	static void commit(final Connection connection) throws SQLException {
+		/* 不在嵌套中则提交 */
+		if (!isNested()) {
+			connection.commit();
+		}
 	}
 
-	static boolean inTrans(final Connection connection) {
-		return connection == connections.get();
+	static void end(final Connection connection) {
+		if (isNested()) {
+			NESTED.remove();
+		} else {
+			CONNECTIONS.remove();
+			closeAll(connection, null, null);
+		}
+	}
+
+	private static boolean isNested() {
+		return NESTED.get() != null;
+	}
+
+	private static boolean isBeginTransaction(final Connection connection) {
+		return connection == CONNECTIONS.get();
 	}
 
 	static Connection getConnection(final DataSource dataSource) throws SQLException {
-		Connection connection = connections.get();
+		Connection connection = CONNECTIONS.get();
 		if (connection == null) {
 			connection = dataSource.getConnection();
 			if (!connection.getAutoCommit()) {
@@ -55,7 +75,7 @@ public abstract class JdbcTransactionUtils {
 	static void closeAll(final Connection connection, final Statement stat, final ResultSet rs) {
 		try {
 			if (connection != null && !connection.isClosed()) {
-				if (!JdbcTransactionUtils.inTrans(connection)) {
+				if (!isBeginTransaction(connection)) {
 					connection.close();
 				}
 			}
