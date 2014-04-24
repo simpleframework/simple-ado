@@ -1,9 +1,7 @@
 package net.simpleframework.ado.db.cache;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
 
 import net.simpleframework.ado.IParamsValue;
@@ -17,8 +15,6 @@ import net.simpleframework.ado.db.common.SQLValue;
 import net.simpleframework.ado.db.event.IDbEntityListener;
 import net.simpleframework.ado.db.event.IDbListener;
 import net.simpleframework.ado.db.jdbc.IJdbcProvider;
-import net.simpleframework.ado.db.jdbc.IJdbcTransactionEvent;
-import net.simpleframework.ado.trans.ITransactionCallback;
 import net.simpleframework.common.BeanUtils;
 
 /**
@@ -80,21 +76,12 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 
 	@Override
 	protected int update(final IDbEntityListener l, final String[] columns, final T... objects) {
-		doUpdateObjects(objects);
-		return super.update(l, columns, objects);
-	}
-
-	protected void doUpdateObjects(final Object... objects) {
-		if (objects == null) {
-			return;
-		}
-		final Map<String, IDbEntityCache> updates = entityCache.get();
-		if (updates != null) {
-			for (final Object object : objects) {
-				final String key = toUniqueString(object);
-				if (key != null) {
-					updates.put(key, this);
-				}
+		try {
+			return super.update(l, columns, objects);
+		} finally {
+			// 同一个bean，由于条件不同，可能有多个key，当更新时，直接从缓存删掉(更好办法？)
+			for (final T t : objects) {
+				removeCache(toUniqueString(t));
 			}
 		}
 	}
@@ -113,8 +100,6 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 			if ((t = super.queryForBean(null/* columns */, paramsValue)) != null) {
 				putCache(key, t);
 			}
-		} else {
-			doUpdateObjects(t);
 		}
 		return t;
 	}
@@ -168,7 +153,6 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 					((Map<String, Object>) data).putAll(nData);
 				}
 			}
-			doUpdateObjects(data);
 		}
 		return (Map<String, Object>) data;
 	}
@@ -225,39 +209,5 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 			reset();
 		}
 		return ret;
-	}
-
-	/************************* transaction ************************/
-	private static ThreadLocal<Map<String, IDbEntityCache>> entityCache;
-	static {
-		entityCache = new ThreadLocal<Map<String, IDbEntityCache>>();
-	}
-
-	private final IJdbcTransactionEvent transactionEvent = new IJdbcTransactionEvent() {
-		@Override
-		public void onExecute(final Connection connection) {
-			entityCache.set(new HashMap<String, IDbEntityCache>());
-		}
-
-		@Override
-		public void onThrowable(final Connection connection) {
-			// 错误时，清除cache
-			final Map<String, IDbEntityCache> cache = entityCache.get();
-			if (cache != null) {
-				for (final Map.Entry<String, IDbEntityCache> entry : cache.entrySet()) {
-					entry.getValue().removeCache(entry.getKey());
-				}
-			}
-		}
-
-		@Override
-		public void onFinally(final Connection connection) {
-			entityCache.remove();
-		}
-	};
-
-	@Override
-	public <M> M doExecuteTransaction(final ITransactionCallback<M> callback) {
-		return getJdbcProvider().doExecuteTransaction(callback, transactionEvent);
 	}
 }
