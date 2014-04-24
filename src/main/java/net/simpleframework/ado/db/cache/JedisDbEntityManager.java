@@ -58,6 +58,10 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 	}
 
 	@Override
+	public void removeVal(final Object val) {
+	}
+
+	@Override
 	public void setMaxCacheSize(final int maxCacheSize) {
 	}
 }

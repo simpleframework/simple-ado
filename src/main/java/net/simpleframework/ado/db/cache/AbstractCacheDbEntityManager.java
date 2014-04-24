@@ -2,6 +2,7 @@ package net.simpleframework.ado.db.cache;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
 import net.simpleframework.ado.IParamsValue;
@@ -15,6 +16,7 @@ import net.simpleframework.ado.db.common.SQLValue;
 import net.simpleframework.ado.db.event.IDbEntityListener;
 import net.simpleframework.ado.db.event.IDbListener;
 import net.simpleframework.ado.db.jdbc.IJdbcProvider;
+import net.simpleframework.ado.query.DataQueryUtils;
 import net.simpleframework.common.BeanUtils;
 
 /**
@@ -67,10 +69,13 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 
 	@Override
 	protected int delete(final IDbEntityListener l, final IParamsValue paramsValue) {
+		final List<T> keys = DataQueryUtils.toList(queryBeans(paramsValue));
 		try {
 			return super.delete(l, paramsValue);
 		} finally {
-			reset();
+			for (final T t : keys) {
+				removeVal(t);
+			}
 		}
 	}
 
@@ -81,7 +86,7 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 		} finally {
 			// 同一个bean，由于条件不同，可能有多个key，当更新时，直接从缓存删掉(更好办法？)
 			for (final T t : objects) {
-				removeCache(toUniqueString(t));
+				removeVal(t);
 			}
 		}
 	}

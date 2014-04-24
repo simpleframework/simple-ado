@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.simpleframework.ado.bean.IIdBeanAware;
 import net.simpleframework.ado.db.DbEntityTable;
+import net.simpleframework.common.Convert;
 import net.simpleframework.common.coll.LRUMap;
 import net.simpleframework.common.object.ObjectUtils;
 
@@ -30,7 +31,9 @@ public class MapDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 		setMaxCacheSize(5000);
 	}
 
-	private Map<Object, Object> idCache, vCache;
+	private Map<String, String> idCache;
+
+	private Map<String, Object> vCache;
 
 	public int getMaxCacheSize() {
 		return maxCacheSize;
@@ -40,11 +43,11 @@ public class MapDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 	public void setMaxCacheSize(final int maxCacheSize) {
 		this.maxCacheSize = maxCacheSize;
 		if (maxCacheSize > 0) {
-			idCache = Collections.synchronizedMap(new LRUMap<Object, Object>(maxCacheSize));
-			vCache = Collections.synchronizedMap(new LRUMap<Object, Object>(maxCacheSize));
+			idCache = Collections.synchronizedMap(new LRUMap<String, String>(maxCacheSize));
+			vCache = Collections.synchronizedMap(new LRUMap<String, Object>(maxCacheSize));
 		} else {
-			idCache = new ConcurrentHashMap<Object, Object>();
-			vCache = new ConcurrentHashMap<Object, Object>();
+			idCache = new ConcurrentHashMap<String, String>();
+			vCache = new ConcurrentHashMap<String, Object>();
 		}
 	}
 
@@ -59,17 +62,19 @@ public class MapDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 		return id == null ? null : vCache.get(id);
 	}
 
-	@Override
-	public void putCache(final String key, final Object val) {
+	private String getId(final Object val) {
 		Object id = null;
 		if (val instanceof IIdBeanAware) {
 			id = (((IIdBeanAware) val).getId()).getValue();
 		} else if (val instanceof Map) {
 			id = ((Map<?, ?>) val).get("ID");
 		}
-		if (id == null) {
-			id = ObjectUtils.hashStr(val);
-		}
+		return id == null ? ObjectUtils.hashStr(val) : Convert.toString(id);
+	}
+
+	@Override
+	public void putCache(final String key, final Object val) {
+		final String id = getId(val);
 		idCache.put(key, id);
 		vCache.put(id, val);
 	}
@@ -77,6 +82,11 @@ public class MapDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 	@Override
 	public void removeCache(final String key) {
 		idCache.remove(key);
+	}
+
+	@Override
+	public void removeVal(final Object val) {
+		vCache.remove(getId(val));
 	}
 
 	@Override

@@ -28,6 +28,8 @@ public interface IDbEntityCache {
 	 */
 	void removeCache(String key);
 
+	void removeVal(Object val);
+
 	/**
 	 * 设置cache的最大空间值
 	 * 
