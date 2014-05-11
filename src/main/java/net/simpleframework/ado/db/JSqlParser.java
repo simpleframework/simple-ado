@@ -59,8 +59,10 @@ public abstract class JSqlParser {
 		final SQLSelect sqlSelect = SQLParserUtils.createSQLStatementParser(sql, dbType)
 				.parseSelect().getSelect();
 		sqlSelect.setOrderBy(null);
-		final SQLSelectQueryBlock qBlock = (SQLSelectQueryBlock) sqlSelect.getQuery();
-		if (qBlock.getGroupBy() == null) {
+		final Object oQuery = sqlSelect.getQuery();
+		SQLSelectQueryBlock qBlock;
+		if (oQuery instanceof SQLSelectQueryBlock
+				&& (qBlock = (SQLSelectQueryBlock) oQuery).getGroupBy() == null) {
 			final List<SQLSelectItem> items = qBlock.getSelectList();
 			boolean aggregate = false;
 			for (final SQLSelectItem item : items) {
