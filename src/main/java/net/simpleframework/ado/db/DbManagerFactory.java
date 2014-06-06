@@ -1,7 +1,6 @@
 package net.simpleframework.ado.db;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,16 +20,6 @@ import net.simpleframework.common.object.ObjectFactory;
  *         http://www.simpleframework.net
  */
 public class DbManagerFactory extends ObjectEx implements IADOManagerFactory {
-
-	private static Map<DataSource, DbManagerFactory> mFactoryCache = new HashMap<DataSource, DbManagerFactory>();
-
-	public static DbManagerFactory get(final DataSource dataSource) {
-		DbManagerFactory factory = mFactoryCache.get(dataSource);
-		if (factory == null) {
-			mFactoryCache.put(dataSource, factory = new DbManagerFactory(dataSource));
-		}
-		return factory;
-	}
 
 	protected IJdbcProvider jdbcProvider;
 
