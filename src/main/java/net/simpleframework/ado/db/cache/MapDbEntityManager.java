@@ -28,7 +28,7 @@ public class MapDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 
 	private int maxCacheSize;
 	{
-		setMaxCacheSize(5000);
+		setMaxCacheSize(2000);
 	}
 
 	private Map<String, String> idCache;
