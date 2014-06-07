@@ -36,7 +36,7 @@ public class SQLValue extends AbstractParamsValue<SQLValue> {
 
 	@Override
 	public String getKey() {
-		final StringBuffer sb = new StringBuffer();
+		final StringBuilder sb = new StringBuilder();
 		sb.append(ObjectUtils.hashStr(getSql())).append("-").append(valuesToString());
 		return sb.toString();
 	}
