@@ -363,15 +363,21 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 
 	@Override
 	public int sum(final String column, final IParamsValue paramsValue) {
-		return function(column, "sum", paramsValue);
+		return function(column, "sum", paramsValue).intValue();
+	}
+
+	@Override
+	public float avg(final String column, final IParamsValue paramsValue) {
+		return function(column, "avg", paramsValue).floatValue();
 	}
 
 	@Override
 	public int max(final String column, final IParamsValue paramsValue) {
-		return function(column, "max", paramsValue);
+		return function(column, "max", paramsValue).intValue();
 	}
 
-	private int function(final String column, final String function, final IParamsValue paramsValue) {
+	private Number function(final String column, final String function,
+			final IParamsValue paramsValue) {
 		SQLValue sqlVal;
 		if (paramsValue instanceof SQLValue) {
 			sqlVal = (SQLValue) paramsValue;
@@ -390,11 +396,14 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 			}
 			sqlVal = new SQLValue(sql.toString(), paramsValue != null ? paramsValue.getValues() : null);
 		}
-		return executeQuery(sqlVal, new IQueryExtractor<Integer>() {
-
+		return executeQuery(sqlVal, new IQueryExtractor<Number>() {
 			@Override
-			public Integer extractData(final ResultSet rs) throws SQLException, ADOException {
-				return rs.next() ? rs.getInt(1) : 0;
+			public Number extractData(final ResultSet rs) throws SQLException, ADOException {
+				Number number = null;
+				if (rs.next()) {
+					number = (Number) rs.getObject(1);
+				}
+				return number != null ? number : 0;
 			}
 		});
 	}
