@@ -1,8 +1,5 @@
 package net.simpleframework.ado.db.cache;
 
-import java.io.IOException;
-
-import net.simpleframework.ado.ADOException;
 import net.simpleframework.ado.db.DbEntityTable;
 import net.simpleframework.common.IoUtils;
 import redis.clients.jedis.Jedis;
@@ -35,30 +32,52 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 	@Override
 	public Object getCache(final String key) {
 		try {
-			return IoUtils.deserialize(jedis.get(key.getBytes()));
-		} catch (final IOException e) {
-			throw ADOException.of(e);
-		} catch (final ClassNotFoundException e) {
+			final String id = idCache.get(key);
+			if (id != null) {
+				return IoUtils.deserialize(jedis.get(id.getBytes()));
+			}
+		} catch (final Exception e) {
+			log.warn(e);
 		}
 		return null;
 	}
 
 	@Override
-	public void putCache(final String key, final Object data) {
+	public void putCache(final String key, final Object val) {
 		try {
-			jedis.set(key.getBytes(), IoUtils.serialize(data));
+			final String id = getId(val);
+			if (id != null) {
+				idCache.put(key, id);
+				jedis.set(id.getBytes(), IoUtils.serialize(val));
+			}
 		} catch (final Exception e) {
-			throw ADOException.of(e);
+			log.warn(e);
 		}
 	}
 
 	@Override
 	public void removeCache(final String key) {
-		jedis.del(key.getBytes());
+		final String id = idCache.remove(key);
+		if (id != null) {
+			jedis.del(id.getBytes());
+		}
 	}
 
 	@Override
 	public void removeVal(final Object val) {
+		final String id = getId(val);
+		if (id != null) {
+			jedis.del(id.getBytes());
+		}
+	}
+
+	@Override
+	protected String getId(final Object val) {
+		final String id = super.getId(val);
+		if (id == null) {
+			return null;
+		}
+		return val.getClass().getSimpleName() + ":" + id;
 	}
 
 	@Override

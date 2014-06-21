@@ -1,12 +1,17 @@
 package net.simpleframework.ado.db.cache;
 
+import static net.simpleframework.common.I18n.$m;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import net.simpleframework.ado.ADOException;
 import net.simpleframework.ado.IParamsValue;
 import net.simpleframework.ado.IParamsValue.AbstractParamsValue;
+import net.simpleframework.ado.bean.IIdBeanAware;
 import net.simpleframework.ado.db.BeanWrapper;
 import net.simpleframework.ado.db.DbDataQuery;
 import net.simpleframework.ado.db.DbEntityManager;
@@ -18,6 +23,7 @@ import net.simpleframework.ado.db.event.IDbListener;
 import net.simpleframework.ado.db.jdbc.IJdbcProvider;
 import net.simpleframework.ado.query.DataQueryUtils;
 import net.simpleframework.common.BeanUtils;
+import net.simpleframework.common.Convert;
 
 /**
  * Licensed under the Apache License, Version 2.0
@@ -27,8 +33,48 @@ import net.simpleframework.common.BeanUtils;
  */
 public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T> implements
 		IDbEntityCache {
+	/* 缓存key->id */
+	protected Map<String, String> idCache = new ConcurrentHashMap<String, String>();
+
 	public AbstractCacheDbEntityManager(final DbEntityTable entityTable) {
 		super(entityTable);
+	}
+
+	protected int maxCacheSize;
+	{
+		setMaxCacheSize(5000);
+	}
+
+	public int getMaxCacheSize() {
+		return maxCacheSize;
+	}
+
+	@Override
+	public synchronized void reset() {
+		idCache.clear();
+	}
+
+	@Override
+	public void removeCache(final String key) {
+		idCache.remove(key);
+	}
+
+	protected String getId(final Object val) {
+		if (val == null) {
+			return null;
+		}
+		Object id = null;
+		if (val instanceof IIdBeanAware) {
+			id = (((IIdBeanAware) val).getId()).getValue();
+		} else if (val instanceof Map) {
+			id = ((Map<?, ?>) val).get("ID");
+		} else {
+			id = BeanUtils.getProperty(val, "id");
+		}
+		if (id == null) {
+			throw ADOException.of($m("AbstractCacheDbEntityManager.0"));
+		}
+		return Convert.toString(id);
 	}
 
 	protected String toUniqueString(final Object object) {
