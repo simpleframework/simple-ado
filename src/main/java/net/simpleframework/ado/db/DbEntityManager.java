@@ -271,7 +271,7 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 				if (idBean instanceof IOrderBeanAware) {
 					final IOrderBeanAware oBean = (IOrderBeanAware) bean;
 					if (oBean.getOorder() == 0) {
-						int max = max("oorder", null);
+						int max = max("oorder", null).intValue();
 						oBean.setOorder(++max);
 					}
 				}
@@ -362,18 +362,18 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 	}
 
 	@Override
-	public int sum(final String column, final IParamsValue paramsValue) {
-		return function(column, "sum", paramsValue).intValue();
+	public Number sum(final String column, final IParamsValue paramsValue) {
+		return function(column, "sum", paramsValue);
 	}
 
 	@Override
-	public float avg(final String column, final IParamsValue paramsValue) {
-		return function(column, "avg", paramsValue).floatValue();
+	public Number avg(final String column, final IParamsValue paramsValue) {
+		return function(column, "avg", paramsValue);
 	}
 
 	@Override
-	public int max(final String column, final IParamsValue paramsValue) {
-		return function(column, "max", paramsValue).intValue();
+	public Number max(final String column, final IParamsValue paramsValue) {
+		return function(column, "max", paramsValue);
 	}
 
 	private Number function(final String column, final String function,

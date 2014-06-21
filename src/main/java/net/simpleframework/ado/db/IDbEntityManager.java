@@ -126,11 +126,11 @@ public interface IDbEntityManager<T> extends IDbManager {
 
 	int count(IParamsValue paramsValue);
 
-	int sum(String column, IParamsValue paramsValue);
+	Number sum(String column, IParamsValue paramsValue);
 
-	float avg(String column, IParamsValue paramsValue);
+	Number avg(String column, IParamsValue paramsValue);
 
-	int max(String column, IParamsValue paramsValue);
+	Number max(String column, IParamsValue paramsValue);
 
 	Object exchange(T bean1, T bean2, DbTableColumn order, boolean up);
 }
