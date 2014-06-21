@@ -1,14 +1,11 @@
 package net.simpleframework.ado.db.cache;
 
-import static net.simpleframework.common.I18n.$m;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.simpleframework.ado.ADOException;
 import net.simpleframework.ado.IParamsValue;
 import net.simpleframework.ado.IParamsValue.AbstractParamsValue;
 import net.simpleframework.ado.bean.IIdBeanAware;
@@ -71,10 +68,7 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 		} else {
 			id = BeanUtils.getProperty(val, "id");
 		}
-		if (id == null) {
-			throw ADOException.of($m("AbstractCacheDbEntityManager.0"));
-		}
-		return Convert.toString(id);
+		return id == null ? null : Convert.toString(id);
 	}
 
 	protected String toUniqueString(final Object object) {
