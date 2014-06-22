@@ -26,33 +26,39 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 		this.pool = pool;
 	}
 
-	private Jedis getJedis() {
-		return pool.getResource();
-	}
-
 	@Override
 	public Object getCache(final String key) {
+		final Jedis jedis = pool.getResource();
 		try {
 			final String id = idCache.get(key);
 			if (id != null) {
-				return IoUtils.deserialize(getJedis().get(id.getBytes()));
+				return IoUtils.deserialize(jedis.get(id.getBytes()));
 			}
 		} catch (final Exception e) {
+			// 释放redis对象
+			pool.returnBrokenResource(jedis);
 			log.warn(e);
+		} finally {
+			// 返还到连接池
+			pool.returnResource(jedis);
 		}
 		return null;
 	}
 
 	@Override
 	public void putCache(final String key, final Object val) {
+		final Jedis jedis = pool.getResource();
 		try {
 			final String id = getId(val);
 			if (id != null) {
 				idCache.put(key, id);
-				getJedis().set(id.getBytes(), IoUtils.serialize(val));
+				jedis.set(id.getBytes(), IoUtils.serialize(val));
 			}
 		} catch (final Exception e) {
+			pool.returnBrokenResource(jedis);
 			log.warn(e);
+		} finally {
+			pool.returnResource(jedis);
 		}
 	}
 
@@ -60,7 +66,12 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 	public void removeCache(final String key) {
 		final String id = idCache.remove(key);
 		if (id != null) {
-			getJedis().del(id.getBytes());
+			final Jedis jedis = pool.getResource();
+			try {
+				jedis.del(id.getBytes());
+			} finally {
+				pool.returnResource(jedis);
+			}
 		}
 	}
 
@@ -68,7 +79,12 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 	public void removeVal(final Object val) {
 		final String id = getId(val);
 		if (id != null) {
-			getJedis().del(id.getBytes());
+			final Jedis jedis = pool.getResource();
+			try {
+				jedis.del(id.getBytes());
+			} finally {
+				pool.returnResource(jedis);
+			}
 		}
 	}
 
