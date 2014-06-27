@@ -36,11 +36,10 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			}
 		} catch (final Exception e) {
 			// 释放redis对象
-			pool.returnBrokenResource(jedis);
-			log.warn(e);
+			doJedisException(jedis, e);
 		} finally {
 			// 返还到连接池
-			pool.returnResource(jedis);
+			returnResource(jedis);
 		}
 		return null;
 	}
@@ -55,10 +54,9 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 				jedis.set(id.getBytes(), IoUtils.serialize(val));
 			}
 		} catch (final Exception e) {
-			pool.returnBrokenResource(jedis);
-			log.warn(e);
+			doJedisException(jedis, e);
 		} finally {
-			pool.returnResource(jedis);
+			returnResource(jedis);
 		}
 	}
 
@@ -70,7 +68,7 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			try {
 				jedis.del(id.getBytes());
 			} finally {
-				pool.returnResource(jedis);
+				returnResource(jedis);
 			}
 		}
 	}
@@ -83,7 +81,7 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			try {
 				jedis.del(id.getBytes());
 			} finally {
-				pool.returnResource(jedis);
+				returnResource(jedis);
 			}
 		}
 	}
@@ -99,5 +97,18 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 
 	@Override
 	public void setMaxCacheSize(final int maxCacheSize) {
+	}
+
+	private void returnResource(final Jedis jedis) {
+		try {
+			pool.returnResource(jedis);
+		} catch (final Exception e) {
+			doJedisException(jedis, e);
+		}
+	}
+
+	private void doJedisException(final Jedis jedis, final Exception e) {
+		pool.returnBrokenResource(jedis);
+		log.warn(e);
 	}
 }
