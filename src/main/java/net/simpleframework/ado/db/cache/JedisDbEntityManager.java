@@ -100,6 +100,9 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 	}
 
 	private void returnResource(final Jedis jedis) {
+		if (jedis == null) {
+			return;
+		}
 		try {
 			pool.returnResource(jedis);
 		} catch (final Exception e) {
@@ -108,7 +111,9 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 	}
 
 	private void doJedisException(final Jedis jedis, final Exception e) {
-		pool.returnBrokenResource(jedis);
-		log.warn(e);
+		if (jedis != null) {
+			pool.returnBrokenResource(jedis);
+			log.warn(e);
+		}
 	}
 }
