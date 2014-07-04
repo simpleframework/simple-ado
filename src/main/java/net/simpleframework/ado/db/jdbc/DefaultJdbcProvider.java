@@ -131,13 +131,16 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 			final IJdbcTransactionEvent event) {
 		Connection connection = null;
 		try {
-			connection = JdbcTransactionUtils.begin(getDataSource());
-			if (event != null) {
-				event.onExecute(connection);
+			final DataSource dataSource = getDataSource();
+			synchronized (dataSource) {
+				connection = JdbcTransactionUtils.begin(dataSource);
+				if (event != null) {
+					event.onExecute(connection);
+				}
+				final T t = callback.onTransactionCallback();
+				JdbcTransactionUtils.commit(connection);
+				return t;
 			}
-			final T t = callback.onTransactionCallback();
-			JdbcTransactionUtils.commit(connection);
-			return t;
 		} catch (final Throwable th) {
 			try {
 				if (connection != null) {
