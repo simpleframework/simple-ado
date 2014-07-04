@@ -408,6 +408,11 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 		});
 	}
 
+	@Override
+	public Object queryFor(final String column, final IParamsValue paramsValue) {
+		return executeQuery(new String[] { column }, paramsValue).get(column);
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public Object exchange(final T bean1, final T bean2, final DbTableColumn order, final boolean up) {

@@ -124,6 +124,8 @@ public interface IDbEntityManager<T> extends IDbManager {
 
 	/* utils */
 
+	Object queryFor(String column, IParamsValue paramsValue);
+
 	int count(IParamsValue paramsValue);
 
 	Number sum(String column, IParamsValue paramsValue);
