@@ -115,13 +115,22 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 		return queryForBean(null, paramsValue);
 	}
 
+	private Object getIdVal(final Object id) {
+		Object id2;
+		if (id instanceof ID) {
+			id2 = ((ID) id).getValue();
+		} else if (id instanceof IIdBeanAware) {
+			id2 = ((IIdBeanAware) id).getId().getValue();
+		} else {
+			id2 = id;
+		}
+		return id2;
+	}
+
 	@Override
 	public T getBean(final Object id) {
-		if (id == null) {
-			return null;
-		}
-		final ID id2 = ID.of(id);
-		return queryForBean(new UniqueValue(id2.getValue()));
+		final Object id2 = getIdVal(id);
+		return id2 == null ? null : queryForBean(new UniqueValue(id2));
 	}
 
 	@Override
@@ -131,15 +140,8 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 
 	@Override
 	public T getBean(final String[] columns, final Object id) {
-		Object id2;
-		if (id instanceof ID) {
-			id2 = ((ID) id).getValue();
-		} else if (id instanceof IIdBeanAware) {
-			id2 = ((IIdBeanAware) id).getId().getValue();
-		} else {
-			id2 = id;
-		}
-		return queryForBean(columns, new UniqueValue(id2));
+		final Object id2 = getIdVal(id);
+		return id2 == null ? null : queryForBean(columns, new UniqueValue(id2));
 	}
 
 	@Override
