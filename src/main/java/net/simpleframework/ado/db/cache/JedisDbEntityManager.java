@@ -112,8 +112,11 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 
 	private void doJedisException(final Jedis jedis, final Exception e) {
 		if (jedis != null) {
-			pool.returnBrokenResource(jedis);
 			log.warn(e);
+			try {
+				pool.returnBrokenResource(jedis);
+			} catch (final Exception ex) {
+			}
 		}
 	}
 }
