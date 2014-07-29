@@ -26,7 +26,9 @@ import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.statement.SQLSelect;
 import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
 import com.alibaba.druid.sql.ast.statement.SQLSelectOrderByItem;
+import com.alibaba.druid.sql.ast.statement.SQLSelectQuery;
 import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
+import com.alibaba.druid.sql.ast.statement.SQLUnionQuery;
 import com.alibaba.druid.sql.parser.SQLParserUtils;
 
 /**
@@ -148,7 +150,11 @@ public abstract class JSqlParser {
 		}
 		final SQLSelect sqlSelect = SQLParserUtils.createSQLStatementParser(sql, dbType)
 				.parseSelect().getSelect();
-		final SQLSelectQueryBlock qBlock = (SQLSelectQueryBlock) sqlSelect.getQuery();
+		final SQLSelectQuery selectQuery = sqlSelect.getQuery();
+		if (selectQuery instanceof SQLUnionQuery) {
+			return "select * from (" + sql + ") _tbl where " + condition;
+		}
+		final SQLSelectQueryBlock qBlock = (SQLSelectQueryBlock) selectQuery;
 		final SQLExpr expr = SQLParserUtils.createExprParser(condition, dbType).expr();
 		if (qBlock.getWhere() == null) {
 			qBlock.setWhere(expr);
