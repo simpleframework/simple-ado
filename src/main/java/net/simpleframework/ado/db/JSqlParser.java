@@ -96,9 +96,16 @@ public abstract class JSqlParser {
 		if (columns == null || columns.length == 0) {
 			return sql;
 		}
-		final SQLSelect sqlSelect = SQLParserUtils.createSQLStatementParser(sql, dbType)
-				.parseSelect().getSelect();
-		final SQLSelectQueryBlock qBlock = (SQLSelectQueryBlock) sqlSelect.getQuery();
+		SQLSelect sqlSelect = SQLParserUtils.createSQLStatementParser(sql, dbType).parseSelect()
+				.getSelect();
+		SQLSelectQuery selectQuery = sqlSelect.getQuery();
+		if (selectQuery instanceof SQLUnionQuery) {
+			sqlSelect = SQLParserUtils
+					.createSQLStatementParser("select * from (" + sql + ") _tbl", dbType).parseSelect()
+					.getSelect();
+			selectQuery = sqlSelect.getQuery();
+		}
+		final SQLSelectQueryBlock qBlock = (SQLSelectQueryBlock) selectQuery;
 		SQLOrderBy orderBy = null;
 		if (BeanUtils.hasProperty(qBlock, "orderBy")) {
 			orderBy = (SQLOrderBy) BeanUtils.getProperty(qBlock, "orderBy");
@@ -148,11 +155,14 @@ public abstract class JSqlParser {
 		if (!StringUtils.hasText(condition)) {
 			return sql;
 		}
-		final SQLSelect sqlSelect = SQLParserUtils.createSQLStatementParser(sql, dbType)
-				.parseSelect().getSelect();
-		final SQLSelectQuery selectQuery = sqlSelect.getQuery();
+		SQLSelect sqlSelect = SQLParserUtils.createSQLStatementParser(sql, dbType).parseSelect()
+				.getSelect();
+		SQLSelectQuery selectQuery = sqlSelect.getQuery();
 		if (selectQuery instanceof SQLUnionQuery) {
-			return "select * from (" + sql + ") _tbl where " + condition;
+			sqlSelect = SQLParserUtils
+					.createSQLStatementParser("select * from (" + sql + ") _tbl", dbType).parseSelect()
+					.getSelect();
+			selectQuery = sqlSelect.getQuery();
 		}
 		final SQLSelectQueryBlock qBlock = (SQLSelectQueryBlock) selectQuery;
 		final SQLExpr expr = SQLParserUtils.createExprParser(condition, dbType).expr();
