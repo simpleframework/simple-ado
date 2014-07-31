@@ -432,9 +432,7 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 		final int max = Math.max(i1, i2);
 		final int min = Math.min(i1, i2);
 
-		final ArrayList<Object> params = new ArrayList<Object>();
-		params.add(min);
-		params.add(max);
+		final List<Object> params = ArrayUtils.toParams(min, max);
 
 		final String orderSqlName = order.getAlias();
 		final StringBuilder sb = new StringBuilder();
