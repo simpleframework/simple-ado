@@ -2,6 +2,7 @@ package net.simpleframework.ado.db.cache;
 
 import net.simpleframework.ado.db.DbEntityTable;
 import net.simpleframework.common.IoUtils;
+import net.simpleframework.common.JedisUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -36,10 +37,10 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			}
 		} catch (final Exception e) {
 			// 释放redis对象
-			doJedisException(jedis, e);
+			JedisUtils.doJedisException(pool, jedis, e);
 		} finally {
 			// 返还到连接池
-			returnResource(jedis);
+			JedisUtils.returnResource(pool, jedis);
 		}
 		return null;
 	}
@@ -54,9 +55,9 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 				jedis.set(id.getBytes(), IoUtils.serialize(val));
 			}
 		} catch (final Exception e) {
-			doJedisException(jedis, e);
+			JedisUtils.doJedisException(pool, jedis, e);
 		} finally {
-			returnResource(jedis);
+			JedisUtils.returnResource(pool, jedis);
 		}
 	}
 
@@ -68,7 +69,7 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			try {
 				jedis.del(id.getBytes());
 			} finally {
-				returnResource(jedis);
+				JedisUtils.returnResource(pool, jedis);
 			}
 		}
 	}
@@ -81,7 +82,7 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			try {
 				jedis.del(id.getBytes());
 			} finally {
-				returnResource(jedis);
+				JedisUtils.returnResource(pool, jedis);
 			}
 		}
 	}
@@ -97,26 +98,5 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 
 	@Override
 	public void setMaxCacheSize(final int maxCacheSize) {
-	}
-
-	private void returnResource(final Jedis jedis) {
-		if (jedis == null) {
-			return;
-		}
-		try {
-			pool.returnResource(jedis);
-		} catch (final Exception e) {
-			doJedisException(jedis, e);
-		}
-	}
-
-	private void doJedisException(final Jedis jedis, final Exception e) {
-		if (jedis != null) {
-			log.warn(e);
-			try {
-				pool.returnBrokenResource(jedis);
-			} catch (final Exception ex) {
-			}
-		}
 	}
 }
