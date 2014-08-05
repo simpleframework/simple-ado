@@ -40,7 +40,7 @@ public abstract class LuceneQuery<T> extends AbstractDataQuery<T> {
 			try {
 				_searcher = new IndexSearcher(_reader = DirectoryReader.open(directory));
 			} catch (final IOException e) {
-				log.warn(e.getMessage());
+				getLog().warn(e.getMessage());
 			}
 		}
 		return _searcher;

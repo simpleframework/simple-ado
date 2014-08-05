@@ -110,7 +110,7 @@ public class DefaultStatementCreator extends ObjectEx implements IStatementCreat
 				return (Connection) ClassUtils.invoke(getVendorConnectionMethod, connection);
 			}
 		} catch (final Exception e) {
-			log.warn(e);
+			getLog().warn(e);
 		}
 		return connection;
 	}

@@ -56,7 +56,7 @@ public class BeanWrapper<T> extends ObjectEx {
 		try {
 			bean = beanClass.newInstance();
 		} catch (final Exception e) {
-			log.error(e);
+			getLog().error(e);
 			return null;
 		}
 

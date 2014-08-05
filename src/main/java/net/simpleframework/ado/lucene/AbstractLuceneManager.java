@@ -251,7 +251,7 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 			try {
 				query = qp.parse(queryString.trim());
 			} catch (final ParseException e) {
-				log.warn(e);
+				getLog().warn(e);
 			}
 		}
 		return query;

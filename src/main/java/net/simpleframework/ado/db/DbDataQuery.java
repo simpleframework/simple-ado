@@ -138,7 +138,7 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 				_rs.close();
 			}
 		} catch (final SQLException e) {
-			log.warn(e);
+			getLog().warn(e);
 		}
 	}
 

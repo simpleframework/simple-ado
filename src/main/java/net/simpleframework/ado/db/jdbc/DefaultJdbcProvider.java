@@ -147,7 +147,7 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 					connection.rollback();
 				}
 			} catch (final SQLException e2) {
-				log.warn(e2);
+				getLog().warn(e2);
 			}
 
 			if (event != null) {
