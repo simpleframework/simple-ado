@@ -40,8 +40,8 @@ public class DbQueryManager extends AbstractDbManager implements IDbQueryManager
 	}
 
 	@Override
-	public long queryForLong(final SQLValue value) {
-		return executeQuery(value, new IQueryExtractor<Long>() {
+	public long queryForLong(final SQLValue sqlVal) {
+		return executeQuery(sqlVal, new IQueryExtractor<Long>() {
 			@Override
 			public Long extractData(final ResultSet rs) throws SQLException, ADOException {
 				return rs.next() ? rs.getLong(1) : 0l;
@@ -50,11 +50,21 @@ public class DbQueryManager extends AbstractDbManager implements IDbQueryManager
 	}
 
 	@Override
-	public int queryForInt(final SQLValue value) {
-		return executeQuery(value, new IQueryExtractor<Integer>() {
+	public int queryForInt(final SQLValue sqlVal) {
+		return executeQuery(sqlVal, new IQueryExtractor<Integer>() {
 			@Override
 			public Integer extractData(final ResultSet rs) throws SQLException, ADOException {
 				return rs.next() ? rs.getInt(1) : 0;
+			}
+		});
+	}
+
+	@Override
+	public boolean queryForBool(final SQLValue sqlVal) {
+		return executeQuery(sqlVal, new IQueryExtractor<Boolean>() {
+			@Override
+			public Boolean extractData(final ResultSet rs) throws SQLException, ADOException {
+				return rs.next() ? rs.getBoolean(1) : false;
 			}
 		});
 	}

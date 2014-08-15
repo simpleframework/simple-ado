@@ -20,6 +20,8 @@ public interface IDbQueryManager extends IDbManager {
 
 	int queryForInt(SQLValue sqlVal);
 
+	boolean queryForBool(SQLValue sqlVal);
+
 	/**
 	 * 
 	 * @param sqlVal
