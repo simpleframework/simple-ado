@@ -184,7 +184,7 @@ public abstract class AbstractDbManager extends AbstractADOManager implements ID
 
 	protected DbDataQuery<Map<String, Object>> createQueryEntitySet(final String[] columns,
 			final SQLValue sqlVal) {
-		return new DbDataQuery<Map<String, Object>>(getJdbcProvider(), sqlVal) {
+		return new DbDataQuery<Map<String, Object>>(dbFactory, this, sqlVal) {
 
 			@Override
 			public Map<String, Object> mapRow(final ResultSet rs, final int rowNum)
@@ -197,7 +197,7 @@ public abstract class AbstractDbManager extends AbstractADOManager implements ID
 	protected <T> DbDataQuery<T> createQueryEntitySet(final String[] columns, final SQLValue sqlVal,
 			final Class<T> beanClass) {
 		final BeanWrapper<T> wrapper = new BeanWrapper<T>(columns, beanClass);
-		return new DbDataQuery<T>(getJdbcProvider(), sqlVal) {
+		return new DbDataQuery<T>(dbFactory, this, sqlVal) {
 
 			@Override
 			public T mapRow(final ResultSet rs, final int rowNum) throws SQLException {

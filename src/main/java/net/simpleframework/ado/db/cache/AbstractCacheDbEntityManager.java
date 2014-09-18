@@ -156,7 +156,7 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 		} else {
 			final BeanWrapper<T> wrapper = new BeanWrapper<T>(columns, getBeanClass());
 			final IJdbcProvider jdbcProvider = getJdbcProvider();
-			return new DbDataQuery<T>(jdbcProvider, createSQLValue(null /* columns */, paramsValue)) {
+			return new DbDataQuery<T>(dbFactory, this, createSQLValue(null /* columns */, paramsValue)) {
 				@SuppressWarnings("unchecked")
 				@Override
 				public T mapRow(final ResultSet rs, final int rowNum) throws SQLException {
@@ -208,7 +208,7 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 		if (getEntityTable().isNoCache()) {
 			return super.queryMapSet(columns, paramsValue);
 		} else {
-			return new DbDataQuery<Map<String, Object>>(getJdbcProvider(), createSQLValue(columns,
+			return new DbDataQuery<Map<String, Object>>(dbFactory, this, createSQLValue(columns,
 					paramsValue)) {
 
 				@SuppressWarnings("unchecked")

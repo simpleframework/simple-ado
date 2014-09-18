@@ -51,6 +51,10 @@ public class BeanWrapper<T> extends ObjectEx {
 		}
 	}
 
+	public Class<T> getBeanClass() {
+		return beanClass;
+	}
+
 	public T toBean(final IJdbcProvider jdbcProvider, final ResultSet rs) throws SQLException {
 		T bean = null;
 		try {

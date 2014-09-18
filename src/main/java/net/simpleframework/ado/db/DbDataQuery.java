@@ -21,6 +21,7 @@ import net.simpleframework.ado.db.jdbc.IQueryExtractor;
 import net.simpleframework.ado.query.AbstractDataQuery;
 import net.simpleframework.ado.query.IDataQueryListener;
 import net.simpleframework.common.coll.LRUMap;
+import net.simpleframework.common.th.NotImplementedException;
 
 /**
  * Licensed under the Apache License, Version 2.0
@@ -30,8 +31,9 @@ import net.simpleframework.common.coll.LRUMap;
  */
 public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery<T> {
 
-	/* jdbc提供者 */
-	private IJdbcProvider jdbcProvider;
+	private DbManagerFactory managerFactory;
+
+	private AbstractDbManager dbManager;
 
 	private SQLValue sqlVal;
 
@@ -41,34 +43,33 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 	/* 分页取得的数据缓存 */
 	private Map<Integer, T> dataCache;
 
-	/* bean的sql包装器 */
-	protected BeanWrapper<T> beanWrapper;
-
-	public DbDataQuery(final IJdbcProvider jdbcProvider, final SQLValue sqlVal,
-			final Class<T> beanClass) {
-		this.jdbcProvider = jdbcProvider;
+	public DbDataQuery(final DbManagerFactory managerFactory, final AbstractDbManager dbManager,
+			final SQLValue sqlVal) {
+		this.managerFactory = managerFactory;
+		this.dbManager = dbManager;
 		this.sqlVal = sqlVal;
-		if (beanClass != null) {
-			this.beanWrapper = new BeanWrapper<T>(null, beanClass);
-		}
 	}
 
-	public DbDataQuery(final IJdbcProvider jdbcProvider, final String sql, final Object[] values,
-			final Class<T> beanClass) {
-		this(jdbcProvider, new SQLValue(sql, values), beanClass);
+	public DbDataQuery(final DbManagerFactory managerFactory, final AbstractDbManager dbManager,
+			final String sql, final Object[] values) {
+		this(managerFactory, dbManager, new SQLValue(sql, values));
 	}
 
-	public DbDataQuery(final IJdbcProvider jdbcProvider, final SQLValue sqlVal) {
-		this(jdbcProvider, sqlVal, null);
+	public DbManagerFactory getManagerFactory() {
+		return managerFactory;
 	}
 
-	public DbDataQuery(final IJdbcProvider jdbcProvider, final String sql, final Object[] values) {
-		this(jdbcProvider, sql, values, null);
+	public AbstractDbManager getDbManager() {
+		return dbManager;
+	}
+
+	public IJdbcProvider getJdbcProvider() {
+		return managerFactory.jdbcProvider;
 	}
 
 	@Override
 	public DataSource getDataSource() {
-		return jdbcProvider.getDataSource();
+		return getJdbcProvider().getDataSource();
 	}
 
 	@Override
@@ -104,9 +105,9 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 	@Override
 	public int getCount() {
 		if (count < 0) {
-			final SQLValue countSql = new SQLValue(jdbcProvider.getJdbcDialect().toCountSQL(
+			final SQLValue countSql = new SQLValue(getJdbcProvider().getJdbcDialect().toCountSQL(
 					sqlVal.getSql()), sqlVal.getValues());
-			count = jdbcProvider.queryObject(countSql, new IQueryExtractor<Integer>() {
+			count = getJdbcProvider().queryObject(countSql, new IQueryExtractor<Integer>() {
 				@Override
 				public Integer extractData(final ResultSet rs) throws SQLException, ADOException {
 					return rs.next() ? rs.getInt(1) : 0;
@@ -117,7 +118,7 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 	}
 
 	public T mapRow(final ResultSet rs, final int rowNum) throws SQLException {
-		return beanWrapper != null ? beanWrapper.toBean(jdbcProvider, rs) : null;
+		throw NotImplementedException.of(getClass(), "mapRow");
 	}
 
 	/*------------------------- fetchSize==0 --------------------------*/
@@ -151,7 +152,7 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 			try {
 				if (i == 0 && _rs == null) {
 					_conn = getDataSource().getConnection();
-					_ps = jdbcProvider.getStatementCreator().prepareStatement(_conn, sqlVal,
+					_ps = getJdbcProvider().getStatementCreator().prepareStatement(_conn, sqlVal,
 							getResultSetType(), getResultSetConcurrency());
 					_rs = _ps.executeQuery();
 				}
@@ -170,11 +171,11 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 			bean = dataCache.get(i);
 			if (bean == null) {
 				final String sql = sqlVal.getSql();
-				final String lsql = jdbcProvider.getJdbcDialect().toLimitSQL(sql, i, fetchSize);
+				final String lsql = getJdbcProvider().getJdbcDialect().toLimitSQL(sql, i, fetchSize);
 				final boolean absolute = lsql.equals(sql);
 
 				final ArrayList<T> rVal = new ArrayList<T>();
-				jdbcProvider.doQuery(new SQLValue(lsql, sqlVal.getValues()), new IQueryCallback() {
+				getJdbcProvider().doQuery(new SQLValue(lsql, sqlVal.getValues()), new IQueryCallback() {
 					@Override
 					public void processRow(final ResultSet rs) throws SQLException, ADOException {
 						if (absolute && i > 0) {
@@ -229,7 +230,7 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 	@Override
 	public void addCondition(final ExpressionValue ev) {
 		final SQLValue sqlVal = getSqlValue();
-		final String sql = jdbcProvider.getJdbcDialect().toConditionSQL(sqlVal.getSql(),
+		final String sql = getJdbcProvider().getJdbcDialect().toConditionSQL(sqlVal.getSql(),
 				ev.getExpression());
 		sqlVal.setSql(sql);
 		sqlVal.addValues(ev.getValues());
@@ -242,7 +243,7 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 			return;
 		}
 		final SQLValue sqlVal = getSqlValue();
-		final String sql = jdbcProvider.getJdbcDialect().toOrderBySQL(sqlVal.getSql(), columns);
+		final String sql = getJdbcProvider().getJdbcDialect().toOrderBySQL(sqlVal.getSql(), columns);
 		sqlVal.setSql(sql);
 	}
 
@@ -250,7 +251,7 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 
 	int getResultSetType() {
 		if (resultSetType == 0) {
-			resultSetType = jdbcProvider.getJdbcDialect().getResultSetType();
+			resultSetType = getJdbcProvider().getJdbcDialect().getResultSetType();
 		}
 		return resultSetType;
 	}
@@ -275,9 +276,10 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 	}
 
 	public Object doResultSetMetaData(final ResultSetMetaDataCallback callback) {
-		return jdbcProvider.queryObject(
-				new SQLValue(jdbcProvider.getJdbcDialect().toConditionSQL(sqlVal.getSql(), "1 = 2"),
-						sqlVal.getValues()), new IQueryExtractor<Object>() {
+		return getJdbcProvider().queryObject(
+				new SQLValue(getJdbcProvider().getJdbcDialect()
+						.toConditionSQL(sqlVal.getSql(), "1 = 2"), sqlVal.getValues()),
+				new IQueryExtractor<Object>() {
 					@Override
 					public Object extractData(final ResultSet rs) throws SQLException, ADOException {
 						return callback.doResultSetMetaData(rs.getMetaData());
