@@ -31,8 +31,6 @@ import net.simpleframework.common.th.NotImplementedException;
  */
 public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery<T> {
 
-	private DbManagerFactory managerFactory;
-
 	private AbstractDbManager dbManager;
 
 	private SQLValue sqlVal;
@@ -45,7 +43,6 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 
 	public DbDataQuery(final DbManagerFactory managerFactory, final AbstractDbManager dbManager,
 			final SQLValue sqlVal) {
-		this.managerFactory = managerFactory;
 		this.dbManager = dbManager;
 		this.sqlVal = sqlVal;
 	}
@@ -55,16 +52,12 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 		this(managerFactory, dbManager, new SQLValue(sql, values));
 	}
 
-	public DbManagerFactory getManagerFactory() {
-		return managerFactory;
-	}
-
 	public AbstractDbManager getDbManager() {
 		return dbManager;
 	}
 
 	public IJdbcProvider getJdbcProvider() {
-		return managerFactory.jdbcProvider;
+		return getDbManager().getJdbcProvider();
 	}
 
 	@Override
