@@ -21,10 +21,16 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 		super(null);
 	}
 
+	private int expire = 60 * 60 * 24;
+
 	private JedisPool pool;
 
 	public void setJedisPool(final JedisPool pool) {
 		this.pool = pool;
+	}
+
+	public void setExpire(final int expire) {
+		this.expire = expire;
 	}
 
 	@Override
@@ -52,7 +58,7 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			final String id = getId(val);
 			if (id != null) {
 				idCache.put(key, id);
-				jedis.set(id.getBytes(), IoUtils.serialize(val));
+				jedis.setex(id.getBytes(), expire, IoUtils.serialize(val));
 			}
 		} catch (final Exception e) {
 			JedisUtils.doJedisException(pool, jedis, e);
