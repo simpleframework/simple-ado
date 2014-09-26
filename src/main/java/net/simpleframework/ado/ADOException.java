@@ -18,7 +18,7 @@ public class ADOException extends RuntimeExceptionEx {
 		return _of(ADOException.class, message);
 	}
 
-	public static RuntimeException of(final Throwable cause) {
+	public static ADOException of(final Throwable cause) {
 		return _of(ADOException.class, null, cause);
 	}
 
