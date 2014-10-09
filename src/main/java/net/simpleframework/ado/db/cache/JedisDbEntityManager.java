@@ -21,7 +21,7 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 		super(null);
 	}
 
-	public static int DEFAULT_EXPIRE = 60 * 60 * 24;
+	public static int DEFAULT_EXPIRE_TIME = 60 * 60 * 24;
 
 	private int expire;
 
