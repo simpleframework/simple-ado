@@ -162,20 +162,8 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 		}
 	}
 
-	private int transactionLevel = Connection.TRANSACTION_REPEATABLE_READ;
-
-	public int getTransactionLevel() {
-		return transactionLevel;
-	}
-
-	public void setTransactionLevel(final int transactionLevel) {
-		this.transactionLevel = transactionLevel;
-	}
-
 	private Connection getConnection() throws SQLException {
-		final Connection conn = JdbcTransactionUtils.getConnection(getDataSource());
-		conn.setTransactionIsolation(getTransactionLevel());
-		return conn;
+		return JdbcTransactionUtils.getConnection(getDataSource());
 	}
 
 	private void closeAll(final Connection connection, final Statement stat, final ResultSet rs) {
