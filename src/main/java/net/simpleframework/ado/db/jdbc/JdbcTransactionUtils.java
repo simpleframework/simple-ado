@@ -33,6 +33,7 @@ public abstract class JdbcTransactionUtils {
 		if (connection.getAutoCommit()) {
 			connection.setAutoCommit(false);
 		}
+		// connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 		CONNECTIONS.set(connection);
 		return connection;
 	}
@@ -68,8 +69,6 @@ public abstract class JdbcTransactionUtils {
 			if (!connection.getAutoCommit()) {
 				connection.setAutoCommit(true);
 			}
-		} else {
-			connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 		}
 		return connection;
 	}
