@@ -120,7 +120,7 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 					resultSetType, resultSetConcurrency);
 			callback.processRow(rs = ps.executeQuery());
 		} catch (final Exception ex) {
-			throw ADOException.of(ex);
+			throw ADOException.of("sql: " + sqlVal.getSql(), ex);
 		} finally {
 			closeAll(connection, ps, rs);
 		}

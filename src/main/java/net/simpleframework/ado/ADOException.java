@@ -14,12 +14,16 @@ public class ADOException extends RuntimeExceptionEx {
 		super(msg, cause);
 	}
 
+	public static ADOException of(final String message, final Throwable cause) {
+		return _of(ADOException.class, message, cause);
+	}
+
 	public static ADOException of(final String message) {
 		return _of(ADOException.class, message);
 	}
 
 	public static ADOException of(final Throwable cause) {
-		return _of(ADOException.class, null, cause);
+		return of(null, cause);
 	}
 
 	private static final long serialVersionUID = -539640491680179667L;
