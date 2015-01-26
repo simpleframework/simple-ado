@@ -1,13 +1,16 @@
 package net.simpleframework.ado.db;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import net.simpleframework.ado.db.jdbc.IJdbcProvider;
 import net.simpleframework.ado.db.jdbc.JdbcUtils;
+import net.simpleframework.ado.db.jdbc.dialect.IJdbcDialect;
 import net.simpleframework.common.BeanUtils;
+import net.simpleframework.common.StringUtils;
 import net.simpleframework.common.object.ObjectEx;
 
 /**
@@ -64,24 +67,46 @@ public class BeanWrapper<T> extends ObjectEx {
 			return null;
 		}
 
+		final IJdbcDialect dialect = jdbcProvider.getJdbcDialect();
+		final ResultSetMetaData rsmd = rs.getMetaData();
+
+		int[] _indexs = null;
+		final int c = rsmd.getColumnCount();
+		if (c > collection.size() && bean instanceof ObjectEx) {
+			_indexs = new int[c];
+		}
+
 		for (final PropertyCache cache : collection) {
 			if (cache.sqlColumnIndex <= 0) {
-				final int sqlColumnIndex = JdbcUtils.lookupColumnIndex(rs.getMetaData(),
-						cache.dbColumn.getName());
+				final int sqlColumnIndex = JdbcUtils.lookupColumnIndex(rsmd, cache.dbColumn.getName());
 				if (sqlColumnIndex <= 0) {
 					continue;
 				} else {
 					cache.sqlColumnIndex = sqlColumnIndex;
+					if (_indexs != null) {
+						_indexs[sqlColumnIndex - 1] = 1; // 已使用
+					}
 				}
 			}
 
 			final Class<?> propertyType = cache.dbColumn.getPropertyClass();
-			final Object object = jdbcProvider.getJdbcDialect().getResultSetValue(rs,
-					cache.sqlColumnIndex, propertyType);
-			if (object == null) {
+			final Object val = dialect.getResultSetValue(rs, cache.sqlColumnIndex, propertyType);
+			if (val == null) {
 				continue;
 			}
-			BeanUtils.setProperty(bean, cache.propertyName, object);
+			BeanUtils.setProperty(bean, cache.propertyName, val);
+		}
+
+		if (_indexs != null) {
+			for (int i = 1; i <= _indexs.length; i++) {
+				if (_indexs[i - 1] == 0) { // 未使用
+					final Object val = dialect.getResultSetValue(rs, i);
+					String k;
+					if (val != null && StringUtils.hasText(k = JdbcUtils.lookupColumnName(rsmd, i))) {
+						((ObjectEx) bean).setAttr(k.toLowerCase(), val);
+					}
+				}
+			}
 		}
 		return bean;
 	}
