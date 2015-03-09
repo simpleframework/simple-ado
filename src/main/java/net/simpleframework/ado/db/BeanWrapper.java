@@ -58,6 +58,10 @@ public class BeanWrapper<T> extends ObjectEx {
 		return beanClass;
 	}
 
+	public Collection<PropertyCache> getCollection() {
+		return collection;
+	}
+
 	public T toBean(final IJdbcProvider jdbcProvider, final ResultSet rs) throws SQLException {
 		T bean = null;
 		try {
