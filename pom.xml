@@ -50,7 +50,7 @@
     <dependency>
       <groupId>redis.clients</groupId>
       <artifactId>jedis</artifactId>
-      <version>2.6.1</version>
+      <version>2.7.0</version>
       <scope>provided</scope>
     </dependency>
 
@@ -58,20 +58,20 @@
     <dependency>
       <groupId>com.alibaba</groupId>
       <artifactId>druid</artifactId>
-      <version>1.0.12</version>
+      <version>1.0.14</version>
     </dependency>
 
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-queryparser</artifactId>
-      <version>4.7.0</version>
+      <version>4.10.4</version>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.apache.lucene</groupId>
       <artifactId>lucene-analyzers-smartcn</artifactId>
-      <version>4.7.0</version>
+      <version>4.10.4</version>
       <scope>provided</scope>
     </dependency>
 

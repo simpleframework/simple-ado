@@ -42,8 +42,6 @@ import org.apache.lucene.util.Version;
  *         http://www.simpleframework.net
  */
 public abstract class AbstractLuceneManager extends AbstractADOManager implements ILuceneManager {
-	final Version version = Version.LUCENE_47;
-
 	final List<String> queryFieldsCache = new ArrayList<String>();
 
 	private FSDirectory directory;
@@ -88,13 +86,13 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 
 	protected Analyzer getDefaultAnalyzer() {
 		if (defaultAnalyzer == null) {
-			defaultAnalyzer = new SmartChineseAnalyzer(version);
+			defaultAnalyzer = new SmartChineseAnalyzer();
 		}
 		return defaultAnalyzer;
 	}
 
 	protected IndexWriter createIndexWriter() throws IOException {
-		final IndexWriterConfig iwConfig = new IndexWriterConfig(version, getDefaultAnalyzer());
+		final IndexWriterConfig iwConfig = new IndexWriterConfig(Version.LATEST, getDefaultAnalyzer());
 		iwConfig.setOpenMode(OpenMode.CREATE_OR_APPEND);
 		return new IndexWriter(directory, iwConfig);
 	}
@@ -245,9 +243,8 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 	private Query getQuery(final String queryString) {
 		Query query = null;
 		QueryParser qp;
-		if (StringUtils.hasText(queryString)
-				&& indexExists()
-				&& (qp = new MultiFieldQueryParser(version, getQueryFields(), getDefaultAnalyzer())) != null) {
+		if (StringUtils.hasText(queryString) && indexExists()
+				&& (qp = new MultiFieldQueryParser(getQueryFields(), getDefaultAnalyzer())) != null) {
 			try {
 				query = qp.parse(queryString.trim());
 			} catch (final ParseException e) {
