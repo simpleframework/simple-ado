@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import net.simpleframework.ado.ADOException;
@@ -44,37 +43,20 @@ import org.apache.lucene.util.Version;
 public abstract class AbstractLuceneManager extends AbstractADOManager implements ILuceneManager {
 	final Version version = Version.LUCENE_47;
 
-	final List<String> queryFieldsCache = new ArrayList<String>();
-
 	private FSDirectory directory;
 
 	private Analyzer defaultAnalyzer;
 
-	private final String[] queryFields;
-
-	public AbstractLuceneManager(final File indexPath, final String[] queryFields) {
+	public AbstractLuceneManager(final File indexPath) {
 		try {
 			this.directory = FSDirectory.open(indexPath);
 		} catch (final IOException e) {
 			throw ADOException.of(e);
 		}
-		this.queryFields = queryFields;
-	}
-
-	public AbstractLuceneManager(final File indexPath) {
-		this(indexPath, null);
 	}
 
 	public File getIndexPath() {
 		return directory.getDirectory();
-	}
-
-	protected String[] getQueryFields() {
-		if (queryFields != null && queryFields.length > 0) {
-			return queryFields;
-		} else {
-			return queryFieldsCache.toArray(new String[queryFieldsCache.size()]);
-		}
 	}
 
 	@Override
@@ -100,7 +82,15 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 	}
 
 	protected String getId(final Object obj) {
-		return obj instanceof IIdBeanAware ? Convert.toString(((IIdBeanAware) obj).getId()) : null;
+		if (obj instanceof IIdBeanAware) {
+			return Convert.toString(((IIdBeanAware) obj).getId());
+		} else {
+			final Object id = BeanUtils.getProperty(obj, "id");
+			if (id != null) {
+				return Convert.toString(id);
+			}
+		}
+		return null;
 	}
 
 	protected void objectToDocument(final Object obj, final LuceneDocument doc) throws IOException {
@@ -227,12 +217,7 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 	}
 
 	protected Object documentToObject(final LuceneDocument doc, final Class<?> beanClass) {
-		Object obj;
-		if (beanClass == null) {
-			obj = new KVMap();
-		} else {
-			obj = ObjectFactory.newInstance(beanClass);
-		}
+		final Object obj = beanClass == null ? new KVMap() : ObjectFactory.newInstance(beanClass);
 		final String[] queryFields = getQueryFields();
 		if (queryFields != null) {
 			for (final String f : queryFields) {
@@ -241,6 +226,8 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 		}
 		return obj;
 	}
+
+	protected abstract String[] getQueryFields();
 
 	private Query getQuery(final String queryString) {
 		Query query = null;

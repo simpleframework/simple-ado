@@ -50,15 +50,14 @@ public interface ILuceneManager extends IADOManager {
 	 * 查询
 	 * 
 	 * @param queryString
-	 * @param callback
 	 * @param beanClass
+	 * @return
 	 */
 	<T> IDataQuery<T> query(String queryString, Class<T> beanClass);
 
 	/**
-	 * 
 	 * @param queryString
-	 * @param callback
+	 * @return
 	 */
 	IDataQuery<Map<String, Object>> query(String queryString);
 

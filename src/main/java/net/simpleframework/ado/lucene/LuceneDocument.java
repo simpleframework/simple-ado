@@ -46,14 +46,23 @@ public class LuceneDocument {
 	}
 
 	public void addStringField(final String name, final String value, final boolean stored) {
+		if (value == null) {
+			return;
+		}
 		doc.add(new StringField(name, value, stored ? Store.YES : Store.NO));
 	}
 
 	public void addTextField(final String name, final String value, final boolean stored) {
+		if (value == null) {
+			return;
+		}
 		doc.add(new TextField(name, value, stored ? Store.YES : Store.NO));
 	}
 
 	public void addTextField(final String name, final Reader reader) {
+		if (reader == null) {
+			return;
+		}
 		doc.add(new TextField(name, reader));
 	}
 
