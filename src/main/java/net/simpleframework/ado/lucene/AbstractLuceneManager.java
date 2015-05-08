@@ -227,14 +227,11 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 		return obj;
 	}
 
-	protected abstract String[] getQueryFields();
-
-	private Query getQuery(final String queryString) {
+	private Query getQuery(final String[] queryFields, final String queryString) {
 		Query query = null;
 		QueryParser qp;
-		if (StringUtils.hasText(queryString)
-				&& indexExists()
-				&& (qp = new MultiFieldQueryParser(version, getQueryFields(), getDefaultAnalyzer())) != null) {
+		if (StringUtils.hasText(queryString) && indexExists()
+				&& (qp = new MultiFieldQueryParser(version, queryFields, getDefaultAnalyzer())) != null) {
 			try {
 				query = qp.parse(queryString.trim());
 			} catch (final ParseException e) {
@@ -245,8 +242,9 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 	}
 
 	@Override
-	public <T> IDataQuery<T> query(final String queryString, final Class<T> beanClass) {
-		final Query query = getQuery(queryString);
+	public <T> IDataQuery<T> query(final String[] queryFields, final String queryString,
+			final Class<T> beanClass) {
+		final Query query = getQuery(queryFields, queryString);
 		if (query == null) {
 			return DataQueryUtils.nullQuery();
 		}
@@ -260,8 +258,13 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 	}
 
 	@Override
-	public IDataQuery<Map<String, Object>> query(final String queryString) {
-		final Query query = getQuery(queryString);
+	public <T> IDataQuery<T> query(final String queryString, final Class<T> beanClass) {
+		return query(getQueryFields(), queryString, beanClass);
+	}
+
+	@Override
+	public IDataQuery<Map<String, Object>> query(final String[] queryFields, final String queryString) {
+		final Query query = getQuery(queryFields, queryString);
 		if (query == null) {
 			return DataQueryUtils.nullQuery();
 		}
@@ -273,6 +276,13 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 			}
 		};
 	}
+
+	@Override
+	public IDataQuery<Map<String, Object>> query(final String queryString) {
+		return query(getQueryFields(), queryString);
+	}
+
+	protected abstract String[] getQueryFields();
 
 	private void closeWriter(final IndexWriter indexWriter) {
 		try {
