@@ -72,15 +72,6 @@ public class BeanWrapper<T> extends ObjectEx {
 		return size;
 	}
 
-	private Set<String> getPropertiesExt(final ObjectEx bean) {
-		@SuppressWarnings("unchecked")
-		Set<String> set = (Set<String>) bean.getAttr("@getPropertiesExt");
-		if (set == null) {
-			bean.setAttr("@getPropertiesExt", set = new HashSet<String>());
-		}
-		return set;
-	}
-
 	public T toBean(final IJdbcProvider jdbcProvider, final ResultSet rs) throws SQLException {
 		T bean = null;
 		try {
@@ -138,6 +129,15 @@ public class BeanWrapper<T> extends ObjectEx {
 			}
 		}
 		return bean;
+	}
+
+	private Set<String> getPropertiesExt(final ObjectEx bean) {
+		@SuppressWarnings("unchecked")
+		Set<String> set = (Set<String>) bean.getAttr("@getPropertiesExt");
+		if (set == null) {
+			bean.setAttr("@getPropertiesExt", set = new HashSet<String>());
+		}
+		return set;
 	}
 
 	private class PropertyCache {
