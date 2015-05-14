@@ -170,8 +170,7 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 					boolean newObject = t == null || t instanceof Map;
 					if (!newObject && t instanceof ObjectEx) {
 						// 扩展属性
-						final int attrSize = wrapper.getCollection().size() + ((ObjectEx) t).attrSize();
-						if (attrSize < rs.getMetaData().getColumnCount()) {
+						if (wrapper.getPropertiesCount(t) < rs.getMetaData().getColumnCount()) {
 							newObject = true;
 						}
 					}
@@ -221,7 +220,6 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 		} else {
 			return new DbDataQuery<Map<String, Object>>(dbFactory, this, createSQLValue(columns,
 					paramsValue)) {
-
 				@SuppressWarnings("unchecked")
 				@Override
 				public Map<String, Object> mapRow(final ResultSet rs, final int rowNum)

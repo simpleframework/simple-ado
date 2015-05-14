@@ -5,6 +5,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.simpleframework.ado.db.jdbc.IJdbcProvider;
 import net.simpleframework.ado.db.jdbc.JdbcUtils;
@@ -62,6 +64,23 @@ public class BeanWrapper<T> extends ObjectEx {
 		return collection;
 	}
 
+	public int getPropertiesCount(final T bean) {
+		int size = getCollection().size();
+		if (bean instanceof ObjectEx) {
+			size += getPropertiesExt((ObjectEx) bean).size();
+		}
+		return size;
+	}
+
+	private Set<String> getPropertiesExt(final ObjectEx bean) {
+		@SuppressWarnings("unchecked")
+		Set<String> set = (Set<String>) bean.getAttr("@getPropertiesExt");
+		if (set == null) {
+			bean.setAttr("@getPropertiesExt", set = new HashSet<String>());
+		}
+		return set;
+	}
+
 	public T toBean(final IJdbcProvider jdbcProvider, final ResultSet rs) throws SQLException {
 		T bean = null;
 		try {
@@ -91,6 +110,10 @@ public class BeanWrapper<T> extends ObjectEx {
 						_indexs[sqlColumnIndex - 1] = 1; // 已使用
 					}
 				}
+			} else {
+				if (_indexs != null) {
+					_indexs[cache.sqlColumnIndex - 1] = 1; // 已使用
+				}
 			}
 
 			final Class<?> propertyType = cache.dbColumn.getPropertyClass();
@@ -107,7 +130,9 @@ public class BeanWrapper<T> extends ObjectEx {
 					final Object val = dialect.getResultSetValue(rs, i);
 					String k;
 					if (val != null && StringUtils.hasText(k = JdbcUtils.lookupColumnName(rsmd, i))) {
-						((ObjectEx) bean).setAttr(k.toLowerCase(), val);
+						final ObjectEx _bean = (ObjectEx) bean;
+						_bean.setAttr(k = k.toLowerCase(), val);
+						getPropertiesExt(_bean).add(k);
 					}
 				}
 			}
