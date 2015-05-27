@@ -64,7 +64,6 @@ public class BeanWrapper<T> extends ObjectEx {
 		if (!(bean instanceof ObjectEx)) {
 			return;
 		}
-
 		// 扩展属性每次更新
 		final ObjectEx _bean = (ObjectEx) bean;
 		final Set<String> set = getPropertiesExt(_bean);
