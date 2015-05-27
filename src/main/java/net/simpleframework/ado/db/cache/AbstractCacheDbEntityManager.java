@@ -21,7 +21,6 @@ import net.simpleframework.ado.db.jdbc.IJdbcProvider;
 import net.simpleframework.ado.query.DataQueryUtils;
 import net.simpleframework.common.BeanUtils;
 import net.simpleframework.common.Convert;
-import net.simpleframework.common.object.ObjectEx;
 
 /**
  * Licensed under the Apache License, Version 2.0
@@ -167,18 +166,13 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 					}
 					T t = (T) getCache(key);
 
-					boolean newObject = t == null || t instanceof Map;
-					if (!newObject && t instanceof ObjectEx) {
-						// 扩展属性
-						if (wrapper.getPropertiesCount(t) < rs.getMetaData().getColumnCount()) {
-							newObject = true;
-						}
-					}
-
-					if (newObject) {
+					if (t == null || t instanceof Map) {
 						if ((t = wrapper.toBean(jdbcProvider, rs)) != null) {
 							putCache(key, t);
 						}
+					} else {
+						// 扩展属性每次更新
+						wrapper.setPropertiesExt(t, jdbcProvider, rs);
 					}
 					return t;
 				}

@@ -4,8 +4,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import net.simpleframework.ado.db.jdbc.IJdbcProvider;
@@ -14,6 +14,7 @@ import net.simpleframework.ado.db.jdbc.dialect.IJdbcDialect;
 import net.simpleframework.common.BeanUtils;
 import net.simpleframework.common.StringUtils;
 import net.simpleframework.common.object.ObjectEx;
+import net.simpleframework.common.object.ObjectUtils;
 
 /**
  * Licensed under the Apache License, Version 2.0
@@ -23,16 +24,14 @@ import net.simpleframework.common.object.ObjectEx;
  */
 public class BeanWrapper<T> extends ObjectEx {
 
-	private final Collection<PropertyCache> collection;
+	private final List<PropertyCache> properties = new ArrayList<PropertyCache>();
 
 	private final Class<T> beanClass;
 
 	public BeanWrapper(final String[] columns, final Class<T> beanClass) {
 		this.beanClass = beanClass;
-		final Collection<String> fields = BeanUtils.getProperties(beanClass).keySet();
-		collection = new ArrayList<PropertyCache>(fields.size());
 
-		for (final String field : fields) {
+		for (final String field : BeanUtils.getProperties(beanClass).keySet()) {
 			final DbTableColumn col = DbTableColumn.getTableColumns(beanClass).get(field);
 			if (col == null) {
 				continue;
@@ -52,7 +51,7 @@ public class BeanWrapper<T> extends ObjectEx {
 			final PropertyCache cache = new PropertyCache();
 			cache.propertyName = field;
 			cache.dbColumn = col;
-			collection.add(cache);
+			properties.add(cache);
 		}
 	}
 
@@ -60,16 +59,30 @@ public class BeanWrapper<T> extends ObjectEx {
 		return beanClass;
 	}
 
-	public Collection<PropertyCache> getCollection() {
-		return collection;
-	}
-
-	public int getPropertiesCount(final T bean) {
-		int size = getCollection().size();
-		if (bean instanceof ObjectEx) {
-			size += getPropertiesExt((ObjectEx) bean).size();
+	public void setPropertiesExt(final T bean, final IJdbcProvider jdbcProvider, final ResultSet rs)
+			throws SQLException {
+		if (!(bean instanceof ObjectEx)) {
+			return;
 		}
-		return size;
+
+		// 扩展属性每次更新
+		final ObjectEx _bean = (ObjectEx) bean;
+		final Set<String> set = getPropertiesExt(_bean);
+		if (set.size() > 0) {
+			final IJdbcDialect dialect = jdbcProvider.getJdbcDialect();
+			final ResultSetMetaData rsmd = rs.getMetaData();
+			for (final String k : set) {
+				final int iCol = JdbcUtils.lookupColumnIndex(rsmd, k);
+				if (iCol > 0) {
+					final Object val2 = _bean.getAttr(k);
+					final Object val = dialect.getResultSetValue(rs, iCol,
+							val2 != null ? val2.getClass() : null);
+					if (!ObjectUtils.objectEquals(val2, val)) {
+						_bean.setAttr(k, val);
+					}
+				}
+			}
+		}
 	}
 
 	public T toBean(final IJdbcProvider jdbcProvider, final ResultSet rs) throws SQLException {
@@ -86,11 +99,11 @@ public class BeanWrapper<T> extends ObjectEx {
 
 		int[] _indexs = null;
 		final int c = rsmd.getColumnCount();
-		if (c > collection.size() && bean instanceof ObjectEx) {
+		if (c > properties.size() && bean instanceof ObjectEx) {
 			_indexs = new int[c];
 		}
 
-		for (final PropertyCache cache : collection) {
+		for (final PropertyCache cache : properties) {
 			if (cache.sqlColumnIndex <= 0) {
 				final int sqlColumnIndex = JdbcUtils.lookupColumnIndex(rsmd, cache.dbColumn.getName());
 				if (sqlColumnIndex <= 0) {
@@ -101,28 +114,24 @@ public class BeanWrapper<T> extends ObjectEx {
 						_indexs[sqlColumnIndex - 1] = 1; // 已使用
 					}
 				}
-			} else {
-				if (_indexs != null) {
-					_indexs[cache.sqlColumnIndex - 1] = 1; // 已使用
-				}
+			} else if (_indexs != null) {
+				_indexs[cache.sqlColumnIndex - 1] = 1; // 已使用
 			}
 
-			final Class<?> propertyType = cache.dbColumn.getPropertyClass();
-			final Object val = dialect.getResultSetValue(rs, cache.sqlColumnIndex, propertyType);
-			if (val == null) {
-				continue;
+			final Object val = dialect.getResultSetValue(rs, cache.sqlColumnIndex,
+					cache.dbColumn.getPropertyClass());
+			if (val != null) {
+				BeanUtils.setProperty(bean, cache.propertyName, val);
 			}
-			BeanUtils.setProperty(bean, cache.propertyName, val);
 		}
 
 		if (_indexs != null) {
 			for (int i = 1; i <= _indexs.length; i++) {
 				if (_indexs[i - 1] == 0) { // 未使用
-					final Object val = dialect.getResultSetValue(rs, i);
 					String k;
-					if (val != null && StringUtils.hasText(k = JdbcUtils.lookupColumnName(rsmd, i))) {
+					if (StringUtils.hasText(k = JdbcUtils.lookupColumnName(rsmd, i))) {
 						final ObjectEx _bean = (ObjectEx) bean;
-						_bean.setAttr(k = k.toLowerCase(), val);
+						_bean.setAttr(k = k.toLowerCase(), dialect.getResultSetValue(rs, i));
 						getPropertiesExt(_bean).add(k);
 					}
 				}
