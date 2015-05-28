@@ -12,7 +12,6 @@ import net.simpleframework.ado.db.jdbc.IJdbcProvider;
 import net.simpleframework.ado.db.jdbc.JdbcUtils;
 import net.simpleframework.ado.db.jdbc.dialect.IJdbcDialect;
 import net.simpleframework.common.BeanUtils;
-import net.simpleframework.common.StringUtils;
 import net.simpleframework.common.object.ObjectEx;
 import net.simpleframework.common.object.ObjectUtils;
 
@@ -59,6 +58,14 @@ public class BeanWrapper<T> extends ObjectEx {
 		return beanClass;
 	}
 
+	public int getPropertiesCount(final T bean) {
+		int size = properties.size();
+		if (bean instanceof ObjectEx) {
+			size += getPropertiesExt((ObjectEx) bean).size();
+		}
+		return size;
+	}
+
 	public void setPropertiesExt(final T bean, final IJdbcProvider jdbcProvider, final ResultSet rs)
 			throws SQLException {
 		if (!(bean instanceof ObjectEx)) {
@@ -67,18 +74,19 @@ public class BeanWrapper<T> extends ObjectEx {
 		// 扩展属性每次更新
 		final ObjectEx _bean = (ObjectEx) bean;
 		final Set<String> set = getPropertiesExt(_bean);
-		if (set.size() > 0) {
-			final IJdbcDialect dialect = jdbcProvider.getJdbcDialect();
-			final ResultSetMetaData rsmd = rs.getMetaData();
-			for (final String k : set) {
-				final int iCol = JdbcUtils.lookupColumnIndex(rsmd, k);
-				if (iCol > 0) {
-					final Object val2 = _bean.getAttr(k);
-					final Object val = dialect.getResultSetValue(rs, iCol,
-							val2 != null ? val2.getClass() : null);
-					if (!ObjectUtils.objectEquals(val2, val)) {
-						_bean.setAttr(k, val);
-					}
+		if (set.size() == 0) {
+			return;
+		}
+		final IJdbcDialect dialect = jdbcProvider.getJdbcDialect();
+		final ResultSetMetaData rsmd = rs.getMetaData();
+		for (final String k : set) {
+			final int iCol = JdbcUtils.lookupColumnIndex(rsmd, k);
+			if (iCol > 0) {
+				final Object val2 = _bean.getAttr(k);
+				final Object val = dialect.getResultSetValue(rs, iCol, val2 != null ? val2.getClass()
+						: null);
+				if (!ObjectUtils.objectEquals(val2, val)) {
+					_bean.setAttr(k, val);
 				}
 			}
 		}
@@ -127,12 +135,10 @@ public class BeanWrapper<T> extends ObjectEx {
 		if (_indexs != null) {
 			for (int i = 1; i <= _indexs.length; i++) {
 				if (_indexs[i - 1] == 0) { // 未使用
-					String k;
-					if (StringUtils.hasText(k = JdbcUtils.lookupColumnName(rsmd, i))) {
-						final ObjectEx _bean = (ObjectEx) bean;
-						_bean.setAttr(k = k.toLowerCase(), dialect.getResultSetValue(rs, i));
-						getPropertiesExt(_bean).add(k);
-					}
+					final ObjectEx _bean = (ObjectEx) bean;
+					final String k = JdbcUtils.lookupColumnName(rsmd, i).toLowerCase();
+					_bean.setAttr(k, dialect.getResultSetValue(rs, i));
+					getPropertiesExt(_bean).add(k);
 				}
 			}
 		}

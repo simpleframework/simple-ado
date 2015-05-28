@@ -166,7 +166,8 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 					}
 					T t = (T) getCache(key);
 
-					if (t == null || t instanceof Map) {
+					if (t == null || t instanceof Map
+							|| wrapper.getPropertiesCount(t) < rs.getMetaData().getColumnCount()) {
 						if ((t = wrapper.toBean(jdbcProvider, rs)) != null) {
 							putCache(key, t);
 						}
