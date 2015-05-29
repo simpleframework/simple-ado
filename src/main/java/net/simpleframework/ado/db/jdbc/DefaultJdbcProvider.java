@@ -131,14 +131,13 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 			final IJdbcTransactionEvent event) {
 		Connection connection = null;
 		try {
-			final DataSource dataSource = getDataSource();
-			synchronized (dataSource) {
-				connection = JdbcTransactionUtils.begin(dataSource);
+			synchronized (this) {
+				connection = beginTran();
 				if (event != null) {
 					event.onExecute(connection);
 				}
 				final T t = callback.onTransactionCallback();
-				JdbcTransactionUtils.commit(connection);
+				commitTran(connection);
 				return t;
 			}
 		} catch (final Throwable th) {
@@ -155,18 +154,10 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 			}
 			throw ADOException.of(th);
 		} finally {
-			JdbcTransactionUtils.end(connection);
+			endTran(connection);
 			if (event != null) {
 				event.onFinally(connection);
 			}
 		}
-	}
-
-	private Connection getConnection() throws SQLException {
-		return JdbcTransactionUtils.getConnection(getDataSource());
-	}
-
-	private void closeAll(final Connection connection, final Statement stat, final ResultSet rs) {
-		JdbcTransactionUtils.closeAll(connection, stat, rs);
 	}
 }

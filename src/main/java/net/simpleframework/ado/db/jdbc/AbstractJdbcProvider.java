@@ -1,6 +1,9 @@
 package net.simpleframework.ado.db.jdbc;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import javax.sql.DataSource;
 
@@ -21,6 +24,11 @@ import net.simpleframework.common.object.ObjectEx;
  *         http://www.simpleframework.net
  */
 public abstract class AbstractJdbcProvider extends ObjectEx implements IJdbcProvider {
+
+	private final ThreadLocal<Connection> CONNECTIONS = new ThreadLocal<Connection>();
+
+	/* 标识当前连接在嵌套 */
+	private final ThreadLocal<Boolean> NESTED = new ThreadLocal<Boolean>();
 
 	private final DataSource dataSource;
 
@@ -68,5 +76,73 @@ public abstract class AbstractJdbcProvider extends ObjectEx implements IJdbcProv
 			jdbcNative = createJdbcNative();
 		}
 		return jdbcNative;
+	}
+
+	protected Connection getConnection() throws SQLException {
+		Connection connection = CONNECTIONS.get();
+		if (connection == null) {
+			connection = getDataSource().getConnection();
+			if (!connection.getAutoCommit()) {
+				connection.setAutoCommit(true);
+			}
+		}
+		return connection;
+	}
+
+	protected Connection beginTran() throws SQLException {
+		final Connection connection = getConnection();
+		if (isBeginTransaction(connection)) {
+			/* 如果存在正在运行的事务连接,直接返回 */
+			NESTED.set(Boolean.TRUE);
+			return connection;
+		}
+		if (connection.getAutoCommit()) {
+			connection.setAutoCommit(false);
+		}
+		// connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+		CONNECTIONS.set(connection);
+		return connection;
+	}
+
+	protected void commitTran(final Connection connection) throws SQLException {
+		/* 不在嵌套中则提交 */
+		if (!isTranNested()) {
+			connection.commit();
+		}
+	}
+
+	protected void endTran(final Connection connection) {
+		if (isTranNested()) {
+			NESTED.remove();
+		} else {
+			CONNECTIONS.remove();
+			closeAll(connection, null, null);
+		}
+	}
+
+	private boolean isTranNested() {
+		return NESTED.get() != null;
+	}
+
+	private boolean isBeginTransaction(final Connection connection) {
+		return connection == CONNECTIONS.get();
+	}
+
+	protected void closeAll(final Connection connection, final Statement stat, final ResultSet rs) {
+		try {
+			if (connection != null && !connection.isClosed()) {
+				if (!isBeginTransaction(connection)) {
+					connection.close();
+				}
+			}
+			if (stat != null && !stat.isClosed()) {
+				stat.close();
+			}
+			if (rs != null && !rs.isClosed()) {
+				rs.close();
+			}
+		} catch (final SQLException e) {
+			getLog().warn(e);
+		}
 	}
 }
