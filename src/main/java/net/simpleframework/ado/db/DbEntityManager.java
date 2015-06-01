@@ -202,13 +202,18 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 			return 0;
 		}
 
-		final Collection<IADOListener> listeners = getListener(l);
-		for (final IADOListener listener : listeners) {
-			((IDbEntityListener) listener).onBeforeDelete(this, paramsValue);
-		}
-		final int ret = executeUpdate(sqlVal);
-		for (final IADOListener listener : listeners) {
-			((IDbEntityListener) listener).onAfterDelete(this, paramsValue);
+		int ret = 0;
+		try {
+			final Collection<IADOListener> listeners = getListener(l);
+			for (final IADOListener listener : listeners) {
+				((IDbEntityListener) listener).onBeforeDelete(this, paramsValue);
+			}
+			ret = executeUpdate(sqlVal);
+			for (final IADOListener listener : listeners) {
+				((IDbEntityListener) listener).onAfterDelete(this, paramsValue);
+			}
+		} catch (final Exception e) {
+			throw ADOException.of(e);
 		}
 		return ret;
 	}
@@ -259,32 +264,37 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 			return 0;
 		}
 
-		final Collection<IADOListener> listeners = getListener(l);
-		for (final IADOListener listener : listeners) {
-			((IDbEntityListener) listener).onBeforeInsert(this, beans);
-		}
 		int ret = 0;
-		for (final Object bean : beans) {
-			if (bean instanceof IIdBeanAware) {
-				final IIdBeanAware idBean = (IIdBeanAware) bean;
-				if (idBean.getId() == null) {
-					idBean.setId(ID.uuid());
-				}
-				if (idBean instanceof IOrderBeanAware) {
-					final IOrderBeanAware oBean = (IOrderBeanAware) bean;
-					if (oBean.getOorder() == 0) {
-						int max = max("oorder", null).intValue();
-						oBean.setOorder(++max);
+		try {
+			final Collection<IADOListener> listeners = getListener(l);
+			for (final IADOListener listener : listeners) {
+				((IDbEntityListener) listener).onBeforeInsert(this, beans);
+			}
+
+			for (final Object bean : beans) {
+				if (bean instanceof IIdBeanAware) {
+					final IIdBeanAware idBean = (IIdBeanAware) bean;
+					if (idBean.getId() == null) {
+						idBean.setId(ID.uuid());
+					}
+					if (idBean instanceof IOrderBeanAware) {
+						final IOrderBeanAware oBean = (IOrderBeanAware) bean;
+						if (oBean.getOorder() == 0) {
+							int max = max("oorder", null).intValue();
+							oBean.setOorder(++max);
+						}
 					}
 				}
+				final SQLValue sqlVal = SQLBuilder.getInsertSQLValue(getEntityTable(), bean);
+				if (sqlVal != null) {
+					ret += executeUpdate(sqlVal);
+				}
 			}
-			final SQLValue sqlVal = SQLBuilder.getInsertSQLValue(getEntityTable(), bean);
-			if (sqlVal != null) {
-				ret += executeUpdate(sqlVal);
+			for (final IADOListener listener : listeners) {
+				((IDbEntityListener) listener).onAfterInsert(this, beans);
 			}
-		}
-		for (final IADOListener listener : listeners) {
-			((IDbEntityListener) listener).onAfterInsert(this, beans);
+		} catch (final Exception e) {
+			throw ADOException.of(e);
 		}
 		return ret;
 	}
@@ -308,19 +318,24 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 			return 0;
 		}
 
-		final Collection<IADOListener> listeners = getListener(l);
-		for (final IADOListener listener : listeners) {
-			((IDbEntityListener) listener).onBeforeUpdate(this, columns, beans);
-		}
 		int ret = 0;
-		for (final Object bean : beans) {
-			final SQLValue sqlVal = SQLBuilder.getUpdateSQLValue(getEntityTable(), columns, bean);
-			if (sqlVal != null) {
-				ret += executeUpdate(sqlVal);
+		try {
+			final Collection<IADOListener> listeners = getListener(l);
+			for (final IADOListener listener : listeners) {
+				((IDbEntityListener) listener).onBeforeUpdate(this, columns, beans);
 			}
-		}
-		for (final IADOListener listener : listeners) {
-			((IDbEntityListener) listener).onAfterUpdate(this, columns, beans);
+
+			for (final Object bean : beans) {
+				final SQLValue sqlVal = SQLBuilder.getUpdateSQLValue(getEntityTable(), columns, bean);
+				if (sqlVal != null) {
+					ret += executeUpdate(sqlVal);
+				}
+			}
+			for (final IADOListener listener : listeners) {
+				((IDbEntityListener) listener).onAfterUpdate(this, columns, beans);
+			}
+		} catch (final Exception e) {
+			throw ADOException.of(e);
 		}
 		return ret;
 	}

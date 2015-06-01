@@ -16,31 +16,35 @@ import net.simpleframework.common.ID;
 public abstract class DbEntityAdapter extends AbstractDbListener implements IDbEntityListener {
 
 	@Override
-	public void onBeforeInsert(final IDbEntityManager<?> manager, final Object[] beans) {
+	public void onBeforeInsert(final IDbEntityManager<?> manager, final Object[] beans)
+			throws Exception {
 	}
 
 	@Override
-	public void onAfterInsert(final IDbEntityManager<?> manager, final Object[] beans) {
+	public void onAfterInsert(final IDbEntityManager<?> manager, final Object[] beans)
+			throws Exception {
 		doAfterEvent(manager, beans);
 	}
 
 	@Override
 	public void onBeforeUpdate(final IDbEntityManager<?> manager, final String[] columns,
-			final Object[] beans) {
+			final Object[] beans) throws Exception {
 	}
 
 	@Override
 	public void onAfterUpdate(final IDbEntityManager<?> manager, final String[] columns,
-			final Object[] beans) {
+			final Object[] beans) throws Exception {
 		doAfterEvent(manager, beans);
 	}
 
 	@Override
-	public void onBeforeDelete(final IDbEntityManager<?> manager, final IParamsValue paramsValue) {
+	public void onBeforeDelete(final IDbEntityManager<?> manager, final IParamsValue paramsValue)
+			throws Exception {
 	}
 
 	@Override
-	public void onAfterDelete(final IDbEntityManager<?> manager, final IParamsValue paramsValue) {
+	public void onAfterDelete(final IDbEntityManager<?> manager, final IParamsValue paramsValue)
+			throws Exception {
 		doAfterEvent(manager, paramsValue);
 	}
 

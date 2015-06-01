@@ -19,7 +19,7 @@ public interface IDbListener extends IADOListener {
 	 * @param sqlValues
 	 * @throws ADOException
 	 */
-	void onBeforeExecute(IDbManager manager, SQLValue[] sqlValues) throws ADOException;
+	void onBeforeExecute(IDbManager manager, SQLValue[] sqlValues) throws Exception;
 
 	/**
 	 * 
@@ -27,5 +27,5 @@ public interface IDbListener extends IADOListener {
 	 * @param sqlValues
 	 * @throws ADOException
 	 */
-	void onAfterExecute(IDbManager manager, SQLValue[] sqlValues) throws ADOException;
+	void onAfterExecute(IDbManager manager, SQLValue[] sqlValues) throws Exception;
 }

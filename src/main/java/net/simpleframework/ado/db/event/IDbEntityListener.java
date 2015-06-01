@@ -13,19 +13,21 @@ public interface IDbEntityListener extends IDbListener {
 
 	/* delete event */
 
-	void onBeforeDelete(IDbEntityManager<?> manager, IParamsValue paramsValue);
+	void onBeforeDelete(IDbEntityManager<?> manager, IParamsValue paramsValue) throws Exception;
 
-	void onAfterDelete(IDbEntityManager<?> manager, IParamsValue paramsValue);
+	void onAfterDelete(IDbEntityManager<?> manager, IParamsValue paramsValue) throws Exception;
 
 	/* insert event */
 
-	void onBeforeInsert(IDbEntityManager<?> manager, Object[] beans);
+	void onBeforeInsert(IDbEntityManager<?> manager, Object[] beans) throws Exception;
 
-	void onAfterInsert(IDbEntityManager<?> manager, Object[] beans);
+	void onAfterInsert(IDbEntityManager<?> manager, Object[] beans) throws Exception;
 
 	/* update event */
 
-	void onBeforeUpdate(IDbEntityManager<?> manager, String[] columns, Object[] beans);
+	void onBeforeUpdate(IDbEntityManager<?> manager, String[] columns, Object[] beans)
+			throws Exception;
 
-	void onAfterUpdate(IDbEntityManager<?> manager, String[] columns, Object[] beans);
+	void onAfterUpdate(IDbEntityManager<?> manager, String[] columns, Object[] beans)
+			throws Exception;
 }

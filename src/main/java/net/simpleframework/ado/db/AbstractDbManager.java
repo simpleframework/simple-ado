@@ -75,22 +75,27 @@ public abstract class AbstractDbManager extends AbstractADOManager implements ID
 		if (sqlValues == null || sqlValues.length == 0) {
 			return 0;
 		}
-		if (l != null) {
-			l.onBeforeExecute(this, sqlValues);
-		}
-		final Collection<IADOListener> listeners = getListeners();
-		for (final IADOListener listener : listeners) {
-			((IDbListener) listener).onBeforeExecute(this, sqlValues);
-		}
 		int ret = 0;
-		for (final SQLValue sqlVal : sqlValues) {
-			ret += executeUpdate(sqlVal);
-		}
-		if (l != null) {
-			l.onAfterExecute(this, sqlValues);
-		}
-		for (final IADOListener listener : listeners) {
-			((IDbListener) listener).onAfterExecute(this, sqlValues);
+		try {
+			if (l != null) {
+				l.onBeforeExecute(this, sqlValues);
+			}
+			final Collection<IADOListener> listeners = getListeners();
+			for (final IADOListener listener : listeners) {
+				((IDbListener) listener).onBeforeExecute(this, sqlValues);
+			}
+
+			for (final SQLValue sqlVal : sqlValues) {
+				ret += executeUpdate(sqlVal);
+			}
+			if (l != null) {
+				l.onAfterExecute(this, sqlValues);
+			}
+			for (final IADOListener listener : listeners) {
+				((IDbListener) listener).onAfterExecute(this, sqlValues);
+			}
+		} catch (final Exception e) {
+			throw ADOException.of(e);
 		}
 		return ret;
 	}
