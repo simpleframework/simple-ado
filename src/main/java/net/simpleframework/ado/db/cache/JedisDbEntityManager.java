@@ -2,7 +2,6 @@ package net.simpleframework.ado.db.cache;
 
 import net.simpleframework.ado.db.DbEntityTable;
 import net.simpleframework.common.IoUtils;
-import net.simpleframework.common.JedisUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -37,26 +36,30 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 
 	@Override
 	public Object getCache(final String key) {
-		final Jedis jedis = pool.getResource();
+		Jedis jedis = null;
 		try {
+			jedis = pool.getResource();
 			final String id = idCache.get(key);
 			if (id != null) {
 				return IoUtils.deserialize(jedis.get(id.getBytes()));
 			}
 		} catch (final Exception e) {
 			// 释放redis对象
-			JedisUtils.doJedisException(pool, jedis, e);
+			getLog().warn(e);
 		} finally {
 			// 返还到连接池
-			JedisUtils.returnResource(pool, jedis);
+			if (jedis != null) {
+				jedis.close();
+			}
 		}
 		return null;
 	}
 
 	@Override
 	public void putCache(final String key, final Object val) {
-		final Jedis jedis = pool.getResource();
+		Jedis jedis = null;
 		try {
+			jedis = pool.getResource();
 			final String id = getId(val);
 			if (id != null) {
 				idCache.put(key, id);
@@ -67,9 +70,11 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 				}
 			}
 		} catch (final Exception e) {
-			JedisUtils.doJedisException(pool, jedis, e);
+			getLog().warn(e);
 		} finally {
-			JedisUtils.returnResource(pool, jedis);
+			if (jedis != null) {
+				jedis.close();
+			}
 		}
 	}
 
@@ -77,11 +82,16 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 	public void removeCache(final String key) {
 		final String id = idCache.remove(key);
 		if (id != null) {
-			final Jedis jedis = pool.getResource();
+			Jedis jedis = null;
 			try {
+				jedis = pool.getResource();
 				jedis.del(id.getBytes());
+			} catch (final Exception e) {
+				getLog().warn(e);
 			} finally {
-				JedisUtils.returnResource(pool, jedis);
+				if (jedis != null) {
+					jedis.close();
+				}
 			}
 		}
 	}
@@ -90,11 +100,16 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 	public void removeVal(final Object val) {
 		final String id = getId(val);
 		if (id != null) {
-			final Jedis jedis = pool.getResource();
+			Jedis jedis = null;
 			try {
+				jedis = pool.getResource();
 				jedis.del(id.getBytes());
+			} catch (final Exception e) {
+				getLog().warn(e);
 			} finally {
-				JedisUtils.returnResource(pool, jedis);
+				if (jedis != null) {
+					jedis.close();
+				}
 			}
 		}
 	}
