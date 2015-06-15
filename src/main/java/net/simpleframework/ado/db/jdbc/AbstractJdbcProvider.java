@@ -79,14 +79,16 @@ public abstract class AbstractJdbcProvider extends ObjectEx implements IJdbcProv
 	}
 
 	protected Connection getConnection() throws SQLException {
-		Connection connection = CONNECTIONS.get();
-		if (connection == null) {
-			connection = getDataSource().getConnection();
-			if (!connection.getAutoCommit()) {
-				connection.setAutoCommit(true);
+		synchronized (CONNECTIONS) {
+			Connection connection = CONNECTIONS.get();
+			if (connection == null) {
+				connection = getDataSource().getConnection();
+				if (!connection.getAutoCommit()) {
+					connection.setAutoCommit(true);
+				}
 			}
+			return connection;
 		}
-		return connection;
 	}
 
 	protected Connection beginTran() throws SQLException {
