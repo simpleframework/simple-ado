@@ -1,5 +1,8 @@
 package net.simpleframework.ado.db.jdbc;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import net.simpleframework.ado.db.common.SQLValue;
@@ -20,6 +23,8 @@ public interface IJdbcProvider {
 	 * @return
 	 */
 	DataSource getDataSource();
+
+	Connection getConnection() throws SQLException;
 
 	DatabaseMeta getDatabaseMeta();
 

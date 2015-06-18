@@ -144,8 +144,9 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 		if (fetchSize <= 0) {
 			try {
 				if (i == 0 && _rs == null) {
-					_conn = getDataSource().getConnection();
-					_ps = getJdbcProvider().getStatementCreator().prepareStatement(_conn, sqlVal,
+					final IJdbcProvider jdbcProvider = getJdbcProvider();
+					_conn = jdbcProvider.getConnection();
+					_ps = jdbcProvider.getStatementCreator().prepareStatement(_conn, sqlVal,
 							getResultSetType(), getResultSetConcurrency());
 					_rs = _ps.executeQuery();
 				}
@@ -283,11 +284,5 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 	public static interface ResultSetMetaDataCallback {
 
 		Object doResultSetMetaData(ResultSetMetaData metaData) throws SQLException;
-	}
-
-	@Override
-	protected void finalize() throws Throwable {
-		close();
-		super.finalize();
 	}
 }
