@@ -78,6 +78,7 @@ public abstract class AbstractJdbcProvider extends ObjectEx implements IJdbcProv
 		return jdbcNative;
 	}
 
+	@Override
 	public Connection getConnection() throws SQLException {
 		synchronized (CONNECTIONS) {
 			Connection connection = CONNECTIONS.get();
