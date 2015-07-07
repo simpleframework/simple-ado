@@ -35,8 +35,8 @@ public class DbQueryManager extends AbstractDbManager implements IDbQueryManager
 	}
 
 	@Override
-	public IDbDataQuery<Map<String, Object>> query(final String sql) {
-		return query(new SQLValue(sql));
+	public IDbDataQuery<Map<String, Object>> query(final String sql, final Object... params) {
+		return query(new SQLValue(sql, params));
 	}
 
 	@Override

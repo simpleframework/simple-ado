@@ -34,7 +34,7 @@ public interface IDbQueryManager extends IDbManager {
 	 * @param sql
 	 * @return
 	 */
-	IDbDataQuery<Map<String, Object>> query(String sql);
+	IDbDataQuery<Map<String, Object>> query(String sql, Object... params);
 
 	/**
 	 * 
