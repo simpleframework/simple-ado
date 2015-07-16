@@ -15,7 +15,7 @@ public class SQLValue extends AbstractParamsValue<SQLValue> {
 	public SQLValue() {
 	}
 
-	public SQLValue(final String sql, final Object... values) {
+	public SQLValue(final CharSequence sql, final Object... values) {
 		_sql.append(sql);
 		addValues(values);
 	}

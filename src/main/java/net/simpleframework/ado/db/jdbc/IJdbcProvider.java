@@ -50,9 +50,9 @@ public interface IJdbcProvider {
 	 * @param sqlArr
 	 * @return
 	 */
-	int[] doBatch(String[] sqlArr);
+	int[] doBatch(CharSequence[] sqlArr);
 
-	int[] doBatch(String sql, int batchCount, IBatchValueSetter setter);
+	int[] doBatch(CharSequence sql, int batchCount, IBatchValueSetter setter);
 
 	/**
 	 * 更新

@@ -46,13 +46,13 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 	}
 
 	@Override
-	public int[] doBatch(final String[] sqlArr) {
+	public int[] doBatch(final CharSequence[] sqlArr) {
 		Connection connection = null;
 		Statement stmt = null;
 		try {
 			stmt = getStatementCreator().createStatement(connection = getConnection());
-			for (final String sql : sqlArr) {
-				stmt.addBatch(sql);
+			for (final CharSequence sql : sqlArr) {
+				stmt.addBatch(sql.toString());
 			}
 			return stmt.executeBatch();
 		} catch (final SQLException ex) {
@@ -63,11 +63,11 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 	}
 
 	@Override
-	public int[] doBatch(final String sql, final int batchCount, final IBatchValueSetter setter) {
+	public int[] doBatch(final CharSequence sql, final int batchCount, final IBatchValueSetter setter) {
 		Connection connection = null;
 		PreparedStatement ps = null;
 		try {
-			ps = getStatementCreator().prepareStatement(connection = getConnection(), sql);
+			ps = getStatementCreator().prepareStatement(connection = getConnection(), sql.toString());
 			for (int i = 0; i < batchCount; i++) {
 				setter.setValues(ps, i);
 				ps.addBatch();

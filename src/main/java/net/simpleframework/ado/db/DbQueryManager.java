@@ -20,7 +20,7 @@ import net.simpleframework.ado.trans.ITransactionCallback;
 public class DbQueryManager extends AbstractDbManager implements IDbQueryManager {
 
 	@Override
-	public Map<String, Object> queryForMap(final String sql) {
+	public Map<String, Object> queryForMap(final CharSequence sql) {
 		return queryForMap(new SQLValue(sql));
 	}
 
@@ -35,7 +35,7 @@ public class DbQueryManager extends AbstractDbManager implements IDbQueryManager
 	}
 
 	@Override
-	public IDbDataQuery<Map<String, Object>> query(final String sql, final Object... params) {
+	public IDbDataQuery<Map<String, Object>> query(final CharSequence sql, final Object... params) {
 		return query(new SQLValue(sql, params));
 	}
 

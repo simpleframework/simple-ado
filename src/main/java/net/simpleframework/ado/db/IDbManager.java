@@ -52,7 +52,7 @@ public interface IDbManager extends IADOManager, ITransactionManager {
 	int executeTransaction(SQLValue... sqlValues);
 
 	/* batch */
-	int[] batchUpdate(String... sql);
+	int[] batchUpdate(CharSequence... sql);
 
-	int[] batchUpdate(String sql, int batchCount, IBatchValueSetter setter);
+	int[] batchUpdate(CharSequence sql, int batchCount, IBatchValueSetter setter);
 }

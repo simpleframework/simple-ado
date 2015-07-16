@@ -106,12 +106,13 @@ public abstract class AbstractDbManager extends AbstractADOManager implements ID
 	}
 
 	@Override
-	public int[] batchUpdate(final String... sqlArr) {
+	public int[] batchUpdate(final CharSequence... sqlArr) {
 		return getJdbcProvider().doBatch(sqlArr);
 	}
 
 	@Override
-	public int[] batchUpdate(final String sql, final int batchCount, final IBatchValueSetter setter) {
+	public int[] batchUpdate(final CharSequence sql, final int batchCount,
+			final IBatchValueSetter setter) {
 		return getJdbcProvider().doBatch(sql, batchCount, setter);
 	}
 

@@ -23,16 +23,16 @@ public class ExpressionValue extends AbstractParamsValue<ExpressionValue> {
 	public ExpressionValue() {
 	}
 
-	public ExpressionValue(final String expression, final Object... values) {
+	public ExpressionValue(final CharSequence expression, final Object... values) {
 		addValues(values);
-		_expression.append(StringUtils.text(expression, "1=1"));
+		_expression.append(StringUtils.text(expression.toString(), "1=1"));
 	}
 
 	public String getExpression() {
 		return _expression.toString();
 	}
 
-	public void setExpression(final String expression) {
+	public void setExpression(final CharSequence expression) {
 		_expression.setLength(0);
 		_expression.append(expression);
 	}

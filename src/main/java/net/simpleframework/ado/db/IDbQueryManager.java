@@ -12,7 +12,7 @@ import net.simpleframework.ado.db.common.SQLValue;
  */
 public interface IDbQueryManager extends IDbManager {
 
-	Map<String, Object> queryForMap(String sql);
+	Map<String, Object> queryForMap(CharSequence sql);
 
 	Map<String, Object> queryForMap(SQLValue sqlVal);
 
@@ -34,7 +34,7 @@ public interface IDbQueryManager extends IDbManager {
 	 * @param sql
 	 * @return
 	 */
-	IDbDataQuery<Map<String, Object>> query(String sql, Object... params);
+	IDbDataQuery<Map<String, Object>> query(CharSequence sql, Object... params);
 
 	/**
 	 * 
