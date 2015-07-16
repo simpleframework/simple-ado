@@ -108,8 +108,7 @@ public class ExpressionValue extends AbstractParamsValue<ExpressionValue> {
 				sql.append(")");
 			}
 		}
-		return (sql == null || sql.length() == 0) ? null : new ExpressionValue(sql.toString(),
-				al.toArray());
+		return (sql == null || sql.length() == 0) ? null : new ExpressionValue(sql, al.toArray());
 	}
 
 	private static void doFilterItem(final FilterItem item, final StringBuilder sql,

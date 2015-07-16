@@ -411,7 +411,7 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 					sql.append(" where ").append(((ExpressionValue) paramsValue).getExpression());
 				}
 			}
-			sqlVal = new SQLValue(sql.toString(), paramsValue != null ? paramsValue.getValues() : null);
+			sqlVal = new SQLValue(sql, paramsValue != null ? paramsValue.getValues() : null);
 		}
 		return executeQuery(sqlVal, new IQueryExtractor<Number>() {
 			@Override
@@ -469,8 +469,8 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 			sb.append(" ").append(eo);
 		}
 
-		final List<T> updates = DataQueryUtils.toList(queryBeans(new ExpressionValue(sb.toString(),
-				params.toArray())));
+		final List<T> updates = DataQueryUtils.toList(queryBeans(new ExpressionValue(sb, params
+				.toArray())));
 
 		final int size = updates.size();
 		final Object[] oInt = new Object[size];

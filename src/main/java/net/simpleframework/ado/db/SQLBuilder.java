@@ -161,7 +161,7 @@ public abstract class SQLBuilder {
 			sb.append("?");
 		}
 		sb.append(")");
-		return new SQLValue(sb.toString(), vl.toArray());
+		return new SQLValue(sb, vl.toArray());
 	}
 
 	public static SQLValue getUpdateSQLValue(final DbEntityTable dbTable, final String[] columns,
@@ -200,6 +200,6 @@ public abstract class SQLBuilder {
 		for (final String column : uniqueColumns) {
 			vl.add(getVal(object, dbTable.getBeanPropertyName(column)));
 		}
-		return new SQLValue(sb.toString(), vl.toArray());
+		return new SQLValue(sb, vl.toArray());
 	}
 }
