@@ -14,7 +14,7 @@ public interface IDbQueryManager extends IDbManager {
 
 	Map<String, Object> queryForMap(CharSequence sql, Object... params);
 
-	Map<String, Object> queryForMap2(SQLValue sqlVal);
+	Map<String, Object> queryForMap(SQLValue sqlVal);
 
 	long queryForLong(SQLValue sqlVal);
 

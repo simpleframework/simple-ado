@@ -21,11 +21,11 @@ public class DbQueryManager extends AbstractDbManager implements IDbQueryManager
 
 	@Override
 	public Map<String, Object> queryForMap(final CharSequence sql, final Object... params) {
-		return queryForMap2(new SQLValue(sql, params));
+		return queryForMap(new SQLValue(sql, params));
 	}
 
 	@Override
-	public Map<String, Object> queryForMap2(final SQLValue sqlVal) {
+	public Map<String, Object> queryForMap(final SQLValue sqlVal) {
 		return executeQuery(sqlVal);
 	}
 
