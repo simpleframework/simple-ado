@@ -12,9 +12,9 @@ import net.simpleframework.ado.db.common.SQLValue;
  */
 public interface IDbQueryManager extends IDbManager {
 
-	Map<String, Object> queryForMap(CharSequence sql);
+	Map<String, Object> queryForMap(CharSequence sql, Object... params);
 
-	Map<String, Object> queryForMap(SQLValue sqlVal);
+	Map<String, Object> queryForMap2(SQLValue sqlVal);
 
 	long queryForLong(SQLValue sqlVal);
 
