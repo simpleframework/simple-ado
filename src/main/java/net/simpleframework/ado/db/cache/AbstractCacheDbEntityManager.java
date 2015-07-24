@@ -108,7 +108,7 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 	}
 
 	@Override
-	protected int delete(final IDbEntityListener l, final IParamsValue paramsValue) {
+	protected int delete(final IDbEntityListener<T> l, final IParamsValue paramsValue) {
 		final List<T> keys = DataQueryUtils.toList(queryBeans(paramsValue));
 		try {
 			return super.delete(l, paramsValue);
@@ -120,7 +120,7 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 	}
 
 	@Override
-	protected int update(final IDbEntityListener l, final String[] columns, final T... objects) {
+	protected int update(final IDbEntityListener<T> l, final String[] columns, final T... objects) {
 		try {
 			return super.update(l, columns, objects);
 		} finally {

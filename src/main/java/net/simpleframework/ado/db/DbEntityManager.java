@@ -154,17 +154,18 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 		return createQueryEntitySet(columns, createSQLValue(columns, paramsValue), getBeanClass());
 	}
 
-	private Collection<IADOListener> getListener(final IDbEntityListener l) {
-		final ArrayList<IADOListener> listeners = new ArrayList<IADOListener>();
+	@SuppressWarnings("unchecked")
+	private Collection<IDbEntityListener<T>> getListener(final IDbEntityListener<T> l) {
+		final ArrayList<IDbEntityListener<T>> listeners = new ArrayList<IDbEntityListener<T>>();
 		if (l != null) {
 			listeners.add(l);
 		}
 		final EntityInterceptor interceptor = getBeanClass().getAnnotation(EntityInterceptor.class);
 		if (interceptor != null) {
 			for (final String lClass : interceptor.listenerTypes()) {
-				IDbEntityListener l2 = null;
+				IDbEntityListener<T> l2 = null;
 				try {
-					l2 = (IDbEntityListener) singleton(lClass);
+					l2 = (IDbEntityListener<T>) singleton(lClass);
 				} catch (final Exception e) {
 				}
 				if (l2 != null) {
@@ -172,7 +173,11 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 				}
 			}
 		}
-		listeners.addAll(getListeners());
+		for (final IADOListener l2 : getListeners()) {
+			if (l2 instanceof IDbEntityListener) {
+				listeners.add((IDbEntityListener<T>) l2);
+			}
+		}
 		return listeners;
 	}
 
@@ -183,7 +188,7 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 		return delete(null, paramsValue);
 	}
 
-	protected int delete(final IDbEntityListener l, final IParamsValue paramsValue) {
+	protected int delete(final IDbEntityListener<T> l, final IParamsValue paramsValue) {
 		if (paramsValue == null) {
 			return 0;
 		}
@@ -204,13 +209,13 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 
 		int ret = 0;
 		try {
-			final Collection<IADOListener> listeners = getListener(l);
-			for (final IADOListener listener : listeners) {
-				((IDbEntityListener) listener).onBeforeDelete(this, paramsValue);
+			final Collection<IDbEntityListener<T>> listeners = getListener(l);
+			for (final IDbEntityListener<T> listener : listeners) {
+				listener.onBeforeDelete(this, paramsValue);
 			}
 			ret = executeUpdate(sqlVal);
-			for (final IADOListener listener : listeners) {
-				((IDbEntityListener) listener).onAfterDelete(this, paramsValue);
+			for (final IDbEntityListener<T> listener : listeners) {
+				listener.onAfterDelete(this, paramsValue);
 			}
 		} catch (final Exception e) {
 			throw ADOException.of(e);
@@ -219,7 +224,7 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 	}
 
 	@Override
-	public int deleteTransaction(final IDbEntityListener l, final IParamsValue paramsValue) {
+	public int deleteTransaction(final IDbEntityListener<T> l, final IParamsValue paramsValue) {
 		return doExecuteTransaction(new TransactionObjectCallback<Integer>() {
 
 			@Override
@@ -242,7 +247,7 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 	}
 
 	@Override
-	public int insertTransaction(final IDbEntityListener l, final T... beans) {
+	public int insertTransaction(final IDbEntityListener<T> l, final T... beans) {
 		return doExecuteTransaction(new TransactionObjectCallback<Integer>() {
 
 			@Override
@@ -258,7 +263,7 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 	}
 
 	@SuppressWarnings("unchecked")
-	protected int insert(final IDbEntityListener l, T... beans) {
+	protected int insert(final IDbEntityListener<T> l, T... beans) {
 		beans = (T[]) ArrayUtils.removeDuplicatesAndNulls(beans);
 		if (beans == null || beans.length == 0) {
 			return 0;
@@ -266,9 +271,9 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 
 		int ret = 0;
 		try {
-			final Collection<IADOListener> listeners = getListener(l);
-			for (final IADOListener listener : listeners) {
-				((IDbEntityListener) listener).onBeforeInsert(this, beans);
+			final Collection<IDbEntityListener<T>> listeners = getListener(l);
+			for (final IDbEntityListener<T> listener : listeners) {
+				listener.onBeforeInsert(this, beans);
 			}
 
 			for (final Object bean : beans) {
@@ -290,8 +295,8 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 					ret += executeUpdate(sqlVal);
 				}
 			}
-			for (final IADOListener listener : listeners) {
-				((IDbEntityListener) listener).onAfterInsert(this, beans);
+			for (final IDbEntityListener<T> listener : listeners) {
+				listener.onAfterInsert(this, beans);
 			}
 		} catch (final Exception e) {
 			throw ADOException.of(e);
@@ -312,7 +317,7 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 	}
 
 	@SuppressWarnings("unchecked")
-	protected int update(final IDbEntityListener l, final String[] columns, T... beans) {
+	protected int update(final IDbEntityListener<T> l, final String[] columns, T... beans) {
 		beans = (T[]) ArrayUtils.removeDuplicatesAndNulls(beans);
 		if (beans == null || beans.length == 0) {
 			return 0;
@@ -320,9 +325,9 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 
 		int ret = 0;
 		try {
-			final Collection<IADOListener> listeners = getListener(l);
-			for (final IADOListener listener : listeners) {
-				((IDbEntityListener) listener).onBeforeUpdate(this, columns, beans);
+			final Collection<IDbEntityListener<T>> listeners = getListener(l);
+			for (final IDbEntityListener<T> listener : listeners) {
+				listener.onBeforeUpdate(this, columns, beans);
 			}
 
 			for (final Object bean : beans) {
@@ -331,8 +336,8 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 					ret += executeUpdate(sqlVal);
 				}
 			}
-			for (final IADOListener listener : listeners) {
-				((IDbEntityListener) listener).onAfterUpdate(this, columns, beans);
+			for (final IDbEntityListener<T> listener : listeners) {
+				listener.onAfterUpdate(this, columns, beans);
 			}
 		} catch (final Exception e) {
 			throw ADOException.of(e);
@@ -341,7 +346,8 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 	}
 
 	@Override
-	public int updateTransaction(final IDbEntityListener l, final String[] columns, final T... beans) {
+	public int updateTransaction(final IDbEntityListener<T> l, final String[] columns,
+			final T... beans) {
 		return doExecuteTransaction(new TransactionObjectCallback<Integer>() {
 
 			@Override
@@ -357,13 +363,13 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 	}
 
 	@Override
-	public int updateTransaction(final IDbEntityListener l, final T... beans) {
+	public int updateTransaction(final IDbEntityListener<T> l, final T... beans) {
 		return updateTransaction(l, null, beans);
 	}
 
 	@Override
 	public int updateTransaction(final T... beans) {
-		return updateTransaction((IDbEntityListener) null, beans);
+		return updateTransaction((IDbEntityListener<T>) null, beans);
 	}
 
 	@Override

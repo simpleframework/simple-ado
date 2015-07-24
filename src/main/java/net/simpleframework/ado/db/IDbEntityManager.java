@@ -100,17 +100,17 @@ public interface IDbEntityManager<T> extends IDbManager {
 
 	int updateTransaction(String[] columns, T... beans);
 
-	int updateTransaction(IDbEntityListener l, String[] columns, T... beans);
+	int updateTransaction(IDbEntityListener<T> l, String[] columns, T... beans);
 
 	int updateTransaction(T... beans);
 
-	int updateTransaction(IDbEntityListener l, T... beans);
+	int updateTransaction(IDbEntityListener<T> l, T... beans);
 
 	/* insert */
 
 	int insert(T... beans);
 
-	int insertTransaction(IDbEntityListener l, T... beans);
+	int insertTransaction(IDbEntityListener<T> l, T... beans);
 
 	int insertTransaction(T... beans);
 
@@ -118,7 +118,7 @@ public interface IDbEntityManager<T> extends IDbManager {
 
 	int delete(IParamsValue paramsValue);
 
-	int deleteTransaction(IDbEntityListener l, IParamsValue paramsValue);
+	int deleteTransaction(IDbEntityListener<T> l, IParamsValue paramsValue);
 
 	int deleteTransaction(IParamsValue paramsValue);
 

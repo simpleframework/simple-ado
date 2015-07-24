@@ -13,37 +13,35 @@ import net.simpleframework.common.ID;
  * @author 陈侃(cknet@126.com, 13910090885) https://github.com/simpleframework
  *         http://www.simpleframework.net
  */
-public abstract class DbEntityAdapter extends AbstractDbListener implements IDbEntityListener {
+public abstract class DbEntityAdapter<T> extends AbstractDbListener implements IDbEntityListener<T> {
 
 	@Override
-	public void onBeforeInsert(final IDbEntityManager<?> manager, final Object[] beans)
-			throws Exception {
+	public void onBeforeInsert(final IDbEntityManager<T> manager, final T[] beans) throws Exception {
 	}
 
 	@Override
-	public void onAfterInsert(final IDbEntityManager<?> manager, final Object[] beans)
-			throws Exception {
+	public void onAfterInsert(final IDbEntityManager<T> manager, final T[] beans) throws Exception {
 		doAfterEvent(manager, beans);
 	}
 
 	@Override
-	public void onBeforeUpdate(final IDbEntityManager<?> manager, final String[] columns,
-			final Object[] beans) throws Exception {
+	public void onBeforeUpdate(final IDbEntityManager<T> manager, final String[] columns,
+			final T[] beans) throws Exception {
 	}
 
 	@Override
-	public void onAfterUpdate(final IDbEntityManager<?> manager, final String[] columns,
-			final Object[] beans) throws Exception {
+	public void onAfterUpdate(final IDbEntityManager<T> manager, final String[] columns,
+			final T[] beans) throws Exception {
 		doAfterEvent(manager, beans);
 	}
 
 	@Override
-	public void onBeforeDelete(final IDbEntityManager<?> manager, final IParamsValue paramsValue)
+	public void onBeforeDelete(final IDbEntityManager<T> manager, final IParamsValue paramsValue)
 			throws Exception {
 	}
 
 	@Override
-	public void onAfterDelete(final IDbEntityManager<?> manager, final IParamsValue paramsValue)
+	public void onAfterDelete(final IDbEntityManager<T> manager, final IParamsValue paramsValue)
 			throws Exception {
 		doAfterEvent(manager, paramsValue);
 	}

@@ -9,25 +9,23 @@ import net.simpleframework.ado.db.IDbEntityManager;
  * @author 陈侃(cknet@126.com, 13910090885) https://github.com/simpleframework
  *         http://www.simpleframework.net
  */
-public interface IDbEntityListener extends IDbListener {
+public interface IDbEntityListener<T> extends IDbListener {
 
 	/* delete event */
 
-	void onBeforeDelete(IDbEntityManager<?> manager, IParamsValue paramsValue) throws Exception;
+	void onBeforeDelete(IDbEntityManager<T> manager, IParamsValue paramsValue) throws Exception;
 
-	void onAfterDelete(IDbEntityManager<?> manager, IParamsValue paramsValue) throws Exception;
+	void onAfterDelete(IDbEntityManager<T> manager, IParamsValue paramsValue) throws Exception;
 
 	/* insert event */
 
-	void onBeforeInsert(IDbEntityManager<?> manager, Object[] beans) throws Exception;
+	void onBeforeInsert(IDbEntityManager<T> manager, T[] beans) throws Exception;
 
-	void onAfterInsert(IDbEntityManager<?> manager, Object[] beans) throws Exception;
+	void onAfterInsert(IDbEntityManager<T> manager, T[] beans) throws Exception;
 
 	/* update event */
 
-	void onBeforeUpdate(IDbEntityManager<?> manager, String[] columns, Object[] beans)
-			throws Exception;
+	void onBeforeUpdate(IDbEntityManager<T> manager, String[] columns, T[] beans) throws Exception;
 
-	void onAfterUpdate(IDbEntityManager<?> manager, String[] columns, Object[] beans)
-			throws Exception;
+	void onAfterUpdate(IDbEntityManager<T> manager, String[] columns, T[] beans) throws Exception;
 }
