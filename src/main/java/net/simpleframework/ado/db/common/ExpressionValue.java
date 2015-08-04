@@ -119,8 +119,12 @@ public class ExpressionValue extends AbstractParamsValue<ExpressionValue> {
 		if (relation == EFilterRelation.like) {
 			sql.append(" '%").append(val).append("%'");
 		} else if (relation != EFilterRelation.isNull && relation != EFilterRelation.isNotNull) {
-			sql.append(" ?");
-			al.add(val);
+			if (val instanceof String && ((String) val).startsWith("@")) {
+				sql.append(" ").append(((String) val).substring(1));
+			} else {
+				sql.append(" ?");
+				al.add(val);
+			}
 		}
 	}
 
