@@ -38,7 +38,15 @@ public class MapDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 	@Override
 	public Object getCache(final String key) {
 		final String id = idCache.get(key);
-		return id == null ? null : vCache.get(id);
+		Object val = null;
+		if (id != null) {
+			val = vCache.get(id);
+			if (val == null && idCache.containsKey(key)) {
+				idCache.remove(key);
+			}
+			return val;
+		}
+		return val;
 	}
 
 	@Override
