@@ -4,23 +4,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import net.simpleframework.ado.ADOException;
-import net.simpleframework.ado.EOrder;
 import net.simpleframework.ado.IADOListener;
 import net.simpleframework.ado.IParamsValue;
 import net.simpleframework.ado.UniqueValue;
 import net.simpleframework.ado.bean.IIdBeanAware;
 import net.simpleframework.ado.bean.IOrderBeanAware;
-import net.simpleframework.ado.bean.ITreeBeanAware;
 import net.simpleframework.ado.db.common.EntityInterceptor;
 import net.simpleframework.ado.db.common.ExpressionValue;
 import net.simpleframework.ado.db.common.SQLValue;
 import net.simpleframework.ado.db.event.IDbEntityListener;
 import net.simpleframework.ado.db.jdbc.IQueryExtractor;
-import net.simpleframework.ado.query.DataQueryUtils;
 import net.simpleframework.ado.trans.ITransactionCallback;
 import net.simpleframework.ado.trans.TransactionObjectCallback;
 import net.simpleframework.common.BeanUtils;
@@ -438,77 +434,27 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Object exchange(final T bean1, final T bean2, final DbTableColumn order, final boolean up) {
-		if (bean1 == null || bean2 == null || order == null) {
-			return null;
+	public void exchange(final DbTableColumn order, final T... beans) {
+		if (beans == null || beans.length < 2) {
+			return;
 		}
-
+		// 顺序交换
 		final String orderName = order.getName();
-		final int i1 = ((Number) BeanUtils.getProperty(bean1, orderName)).intValue();
-		final int i2 = ((Number) BeanUtils.getProperty(bean2, orderName)).intValue();
-		if (i1 == i2) {
-			return null;
+		final int length = beans.length;
+		final int[] vals = new int[length];
+		for (int i = 0; i < length; i++) {
+			vals[i] = ((Number) BeanUtils.getProperty(beans[i], orderName)).intValue();
 		}
 
-		final int max = Math.max(i1, i2);
-		final int min = Math.min(i1, i2);
-
-		final List<Object> params = ArrayUtils.toParams(min, max);
-
-		final String orderSqlName = order.getAlias();
-		final StringBuilder sb = new StringBuilder();
-		sb.append(orderSqlName).append(">=? and ").append(orderSqlName).append("<=?");
-		if (bean1 instanceof ITreeBeanAware) {
-			final Object parentId = ((ITreeBeanAware) bean1).getParentId();
-			final String sqlPID = DbTableColumn.getTableColumns(bean1.getClass()).get("parentId")
-					.getAlias();
-			if (parentId == null) {
-				sb.append(" and ").append(sqlPID).append(" is null");
-			} else {
-				sb.append(" and ").append(sqlPID).append("=?");
-				params.add(parentId);
-			}
+		final String[] _columns = new String[] { order.getAlias() };
+		BeanUtils.setProperty(beans[0], orderName, -1);
+		update(_columns, beans[0]);
+		for (int i = 1; i < length; i++) {
+			BeanUtils.setProperty(beans[i], orderName, vals[i - 1]);
+			update(_columns, beans[i]);
 		}
-		sb.append(" order by ").append(orderSqlName);
-		EOrder eo;
-		if ((eo = order.getOrder()) != EOrder.normal) {
-			sb.append(" ").append(eo);
-		}
-
-		final List<T> updates = DataQueryUtils.toList(queryBeans(new ExpressionValue(sb, params
-				.toArray())));
-
-		final int size = updates.size();
-		final Object[] oInt = new Object[size];
-		for (int i = 0; i < size; i++) {
-			oInt[i] = BeanUtils.getProperty(updates.get(i), orderName);
-		}
-
-		final String[] _columns = new String[] { orderSqlName };
-		if (!up) {
-			for (int i = 0; i < size; i++) {
-				// 下一个替换上一个
-				int j = i + 1;
-				if (j == size) {
-					j = 0;
-				}
-				final T t = updates.get(j);
-				BeanUtils.setProperty(t, orderName, oInt[i]);
-				update(_columns, t);
-			}
-		} else {
-			for (int i = size - 1; i >= 0; i--) {
-				// 上一个替换下一个
-				int j = i - 1;
-				if (j == -1) {
-					j = size - 1;
-				}
-				final T t = updates.get(j);
-				BeanUtils.setProperty(t, orderName, oInt[i]);
-				update(_columns, t);
-			}
-		}
-		return updates;
+		BeanUtils.setProperty(beans[0], orderName, vals[length - 1]);
+		update(_columns, beans[0]);
 	}
 
 	@Override

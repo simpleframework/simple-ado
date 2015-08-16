@@ -134,5 +134,11 @@ public interface IDbEntityManager<T> extends IDbManager {
 
 	Number max(String column, IParamsValue paramsValue);
 
-	Object exchange(T bean1, T bean2, DbTableColumn order, boolean up);
+	/**
+	 * 交换位置
+	 * 
+	 * @param order
+	 * @param beans
+	 */
+	void exchange(DbTableColumn order, T... beans);
 }
