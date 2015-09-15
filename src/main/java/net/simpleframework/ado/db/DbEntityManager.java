@@ -156,6 +156,11 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 		if (l != null) {
 			listeners.add(l);
 		}
+		for (final IADOListener l2 : getListeners()) {
+			if (l2 instanceof IDbEntityListener) {
+				listeners.add((IDbEntityListener<T>) l2);
+			}
+		}
 		final EntityInterceptor interceptor = getBeanClass().getAnnotation(EntityInterceptor.class);
 		if (interceptor != null) {
 			for (final String lClass : interceptor.listenerTypes()) {
@@ -167,11 +172,6 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 				if (l2 != null) {
 					listeners.add(l2);
 				}
-			}
-		}
-		for (final IADOListener l2 : getListeners()) {
-			if (l2 instanceof IDbEntityListener) {
-				listeners.add((IDbEntityListener<T>) l2);
 			}
 		}
 		return listeners;
