@@ -32,7 +32,7 @@ public class DbEntityTable implements Serializable {
 	}
 
 	public String getName() {
-		return name;
+		return name != null ? name.toUpperCase() : null;
 	}
 
 	public String[] getUniqueColumns() {
@@ -89,7 +89,7 @@ public class DbEntityTable implements Serializable {
 
 	@Override
 	public String toString() {
-		return name + ", unique[" + StringUtils.join(uniqueColumns, "-") + "]";
+		return getName() + ", unique[" + StringUtils.join(uniqueColumns, "-") + "]";
 	}
 
 	private static final long serialVersionUID = -6445073606291514860L;
