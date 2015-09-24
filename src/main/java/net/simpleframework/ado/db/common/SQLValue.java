@@ -12,6 +12,9 @@ import net.simpleframework.common.object.ObjectUtils;
 public class SQLValue extends AbstractParamsValue<SQLValue> {
 	private final StringBuilder _sql = new StringBuilder();
 
+	/* 最初的sql */
+	private String osql;
+
 	public SQLValue() {
 	}
 
@@ -24,13 +27,23 @@ public class SQLValue extends AbstractParamsValue<SQLValue> {
 		return _sql.toString();
 	}
 
-	public void setSql(final String sql) {
+	public SQLValue setSql(final String sql) {
 		_sql.setLength(0);
 		_sql.append(sql);
+		return this;
 	}
 
 	public SQLValue addSql(final Object sql) {
 		_sql.append(sql);
+		return this;
+	}
+
+	public String getOsql() {
+		return osql != null ? osql : getSql();
+	}
+
+	public SQLValue setOsql(final String osql) {
+		this.osql = osql;
 		return this;
 	}
 

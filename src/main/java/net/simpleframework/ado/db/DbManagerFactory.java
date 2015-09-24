@@ -24,7 +24,11 @@ public class DbManagerFactory extends ObjectEx implements IADOManagerFactory {
 	protected IJdbcProvider jdbcProvider;
 
 	public DbManagerFactory(final DataSource dataSource) {
-		jdbcProvider = new DefaultJdbcProvider(dataSource);
+		jdbcProvider = createJdbcProvider(dataSource);
+	}
+
+	protected DefaultJdbcProvider createJdbcProvider(final DataSource dataSource) {
+		return new DefaultJdbcProvider(dataSource);
 	}
 
 	protected Map<Class<?>, IDbEntityManager<?>> eManagerCache;

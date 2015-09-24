@@ -169,31 +169,32 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 				final boolean absolute = lsql.equals(sql);
 
 				final ArrayList<T> rVal = new ArrayList<T>();
-				getJdbcProvider().doQuery(new SQLValue(lsql, sqlVal.getValues()), new IQueryCallback() {
-					@Override
-					public void processRow(final ResultSet rs) throws SQLException, ADOException {
-						if (absolute && i > 0) {
-							rs.getStatement().setFetchSize(fetchSize);
-							rs.absolute(i);
-						}
-						int j = -1;
-						while (rs.next()) {
-							final int k = i + ++j;
-							if (dataCache.containsKey(k)) {
-								break;
+				getJdbcProvider().doQuery(new SQLValue(lsql, sqlVal.getValues()).setOsql(sql),
+						new IQueryCallback() {
+							@Override
+							public void processRow(final ResultSet rs) throws SQLException, ADOException {
+								if (absolute && i > 0) {
+									rs.getStatement().setFetchSize(fetchSize);
+									rs.absolute(i);
+								}
+								int j = -1;
+								while (rs.next()) {
+									final int k = i + ++j;
+									if (dataCache.containsKey(k)) {
+										break;
+									}
+									final T row = mapRow(rs, j);
+									if (j == 0) {
+										rVal.add(row);
+									}
+									dataCache.put(k, row);
+									// 在oracle测试中
+									if (j == fetchSize - 1) {
+										break;
+									}
+								}
 							}
-							final T row = mapRow(rs, j);
-							if (j == 0) {
-								rVal.add(row);
-							}
-							dataCache.put(k, row);
-							// 在oracle测试中
-							if (j == fetchSize - 1) {
-								break;
-							}
-						}
-					}
-				}, getResultSetType(), getResultSetConcurrency());
+						}, getResultSetType(), getResultSetConcurrency());
 				final Iterator<T> it = rVal.iterator();
 				bean = it.hasNext() ? it.next() : null;
 			}

@@ -109,9 +109,15 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 		}
 	}
 
+	protected long getSlowTimeMillis() {
+		return -1;
+	}
+
 	@Override
 	public void doQuery(final SQLValue sqlVal, final IQueryCallback callback,
 			final int resultSetType, final int resultSetConcurrency) {
+		final long timeMillis = getSlowTimeMillis();
+		final long ls = System.currentTimeMillis();
 		Connection connection = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -119,8 +125,12 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 			ps = getStatementCreator().prepareStatement(connection = getConnection(), sqlVal,
 					resultSetType, resultSetConcurrency);
 			callback.processRow(rs = ps.executeQuery());
+			final long ld = System.currentTimeMillis() - ls;
+			if (timeMillis >= 0 && ld >= timeMillis) {
+				oprintln("[" + ld + "ms, " + sqlVal.getOsql() + "]");
+			}
 		} catch (final Exception ex) {
-			throw ADOException.of("sql: " + sqlVal.getSql(), ex);
+			throw ADOException.of("sql: " + sqlVal.getOsql(), ex);
 		} finally {
 			closeAll(connection, ps, rs);
 		}
