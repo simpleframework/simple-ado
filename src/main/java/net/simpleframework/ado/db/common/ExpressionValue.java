@@ -96,15 +96,11 @@ public class ExpressionValue extends AbstractParamsValue<ExpressionValue> {
 		} else {
 			sql = new StringBuilder();
 			al = new ArrayList<Object>();
-			final FilterItem orItem = item.getOrItem();
-			final boolean q = orItem != null && orItem.getValue() != null;
-			if (q) {
+			if (item.isLbracket()) {
 				sql.append("(");
-				doFilterItem(orItem, sql, al);
-				sql.append(" or ");
 			}
 			doFilterItem(item, sql, al);
-			if (q) {
+			if (item.isRbracket()) {
 				sql.append(")");
 			}
 		}
