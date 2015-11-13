@@ -1,7 +1,9 @@
 package net.simpleframework.ado.db.jdbc;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import javax.sql.DataSource;
 
@@ -99,4 +101,6 @@ public interface IJdbcProvider {
 	 * @return
 	 */
 	<T> T doExecuteTransaction(ITransactionCallback<T> callback, IJdbcTransactionEvent event);
+
+	void closeAll(Connection connection, Statement stat, ResultSet rs);
 }

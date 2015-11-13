@@ -121,19 +121,7 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 
 	@Override
 	public void close() {
-		try {
-			if (_conn != null) {
-				_conn.close();
-			}
-			if (_ps != null) {
-				_ps.close();
-			}
-			if (_rs != null) {
-				_rs.close();
-			}
-		} catch (final SQLException e) {
-			getLog().warn(e);
-		}
+		getJdbcProvider().closeAll(_conn, _ps, _rs);
 	}
 
 	@Override

@@ -131,7 +131,8 @@ public abstract class AbstractJdbcProvider extends ObjectEx implements IJdbcProv
 		return connection == CONNECTIONS.get();
 	}
 
-	protected void closeAll(final Connection connection, final Statement stat, final ResultSet rs) {
+	@Override
+	public void closeAll(final Connection connection, final Statement stat, final ResultSet rs) {
 		try {
 			if (connection != null && !connection.isClosed()) {
 				if (!isBeginTransaction(connection)) {
