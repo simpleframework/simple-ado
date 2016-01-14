@@ -139,6 +139,9 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 					_rs = _ps.executeQuery();
 				}
 				if (_rs != null) {
+					if (_rs.isClosed()) {
+						return null;
+					}
 					if (_rs.next()) {
 						bean = mapRow(_rs, i);
 					} else {
