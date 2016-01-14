@@ -32,7 +32,7 @@ public class DbEntityTable implements Serializable {
 	}
 
 	public String getName() {
-		return name != null ? name.toUpperCase() : null;
+		return name != null ? name.trim().toUpperCase() : null;
 	}
 
 	public String[] getUniqueColumns() {
