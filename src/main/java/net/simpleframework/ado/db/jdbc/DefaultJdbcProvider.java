@@ -11,6 +11,7 @@ import javax.sql.DataSource;
 import net.simpleframework.ado.ADOException;
 import net.simpleframework.ado.db.common.SQLValue;
 import net.simpleframework.ado.trans.ITransactionCallback;
+import net.simpleframework.common.object.ObjectEx;
 
 /**
  * Licensed under the Apache License, Version 2.0
@@ -148,17 +149,15 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 					event.onExecute(connection);
 				}
 				final T t = callback.onTransactionCallback();
-				commitTran(connection);
+				if (t instanceof ObjectEx && ((ObjectEx) t).getAttr("_throwable") instanceof Throwable) {
+					rollback(connection);
+				} else {
+					commitTran(connection);
+				}
 				return t;
 			}
 		} catch (final Throwable th) {
-			try {
-				if (connection != null) {
-					connection.rollback();
-				}
-			} catch (final SQLException e2) {
-				getLog().warn(e2);
-			}
+			rollback(connection);
 
 			if (event != null) {
 				event.onThrowable(connection);
@@ -169,6 +168,16 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 			if (event != null) {
 				event.onFinally(connection);
 			}
+		}
+	}
+
+	private void rollback(final Connection connection) {
+		try {
+			if (connection != null) {
+				connection.rollback();
+			}
+		} catch (final SQLException ex) {
+			getLog().warn(ex);
 		}
 	}
 }
