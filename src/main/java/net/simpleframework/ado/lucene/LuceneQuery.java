@@ -85,15 +85,19 @@ public abstract class LuceneQuery<T> extends AbstractDataQuery<T> {
 		if (query == null) {
 			return null;
 		}
+		final int count = getCount();
 		i++;
-		if (i < 0 || i >= getCount()) {
+		if (i < 0 || i >= count) {
 			return null;
 		}
 		final IndexSearcher searcher = getIndexSearcher();
 		if (searcher == null) {
 			return null;
 		}
-		final int fetchSize = getFetchSize();
+		int fetchSize = getFetchSize();
+		if (fetchSize <= 0) {
+			fetchSize = count;
+		}
 		try {
 			if (topDocs == null || j >= fetchSize) {
 				final int topNum = i + fetchSize;
