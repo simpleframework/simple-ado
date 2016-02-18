@@ -87,6 +87,9 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 		PreparedStatement ps = null;
 		try {
 			ps = getStatementCreator().prepareStatement(connection = getConnection(), sqlVal);
+			if (connection.getAutoCommit()) {
+				oprintln("Auto commit SQL: " + sqlVal.getSql());
+			}
 			return ps.executeUpdate();
 		} catch (final Exception ex) {
 			throw ADOException.of(ex);
