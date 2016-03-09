@@ -429,7 +429,8 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 
 	@Override
 	public Object queryFor(final String column, final IParamsValue paramsValue) {
-		return executeQuery(new String[] { column }, paramsValue).get(column);
+		final Map<String, Object> row = executeQuery(new String[] { column }, paramsValue);
+		return row != null ? row.get(column) : null;
 	}
 
 	@SuppressWarnings("unchecked")
