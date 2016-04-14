@@ -152,6 +152,7 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 					event.onExecute(connection);
 				}
 				final T t = callback.onTransactionCallback();
+				// 当返回值含有"_throwable"属性，则回滚，可能被调用者try-catch掉
 				if (t instanceof ObjectEx && ((ObjectEx) t).getAttr("_throwable") instanceof Throwable) {
 					rollback(connection);
 				} else {
