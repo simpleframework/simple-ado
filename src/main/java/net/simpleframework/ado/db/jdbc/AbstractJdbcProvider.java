@@ -15,6 +15,7 @@ import net.simpleframework.ado.db.jdbc.dialect.MySqlJdbcDialect;
 import net.simpleframework.ado.db.jdbc.dialect.OracleJdbcDialect;
 import net.simpleframework.ado.db.jdbc.dialect.PostgresqlJdbcDialect;
 import net.simpleframework.ado.db.jdbc.dialect.SqlServerJdbcDialect;
+import net.simpleframework.common.Convert;
 import net.simpleframework.common.object.ObjectEx;
 
 /**
@@ -28,7 +29,7 @@ public abstract class AbstractJdbcProvider extends ObjectEx implements IJdbcProv
 	private final ThreadLocal<Connection> CONNECTIONS = new ThreadLocal<Connection>();
 
 	/* 标识当前连接在嵌套 */
-	private final ThreadLocal<Boolean> NESTED = new ThreadLocal<Boolean>();
+	private final ThreadLocal<Integer> NESTED = new ThreadLocal<Integer>();
 
 	private final DataSource dataSource;
 
@@ -96,7 +97,8 @@ public abstract class AbstractJdbcProvider extends ObjectEx implements IJdbcProv
 		final Connection connection = getConnection();
 		if (isBeginTransaction(connection)) {
 			/* 如果存在正在运行的事务连接,直接返回 */
-			NESTED.set(Boolean.TRUE);
+			int i = Convert.toInt(NESTED.get());
+			NESTED.set(++i);
 			return connection;
 		}
 		if (connection.getAutoCommit()) {
@@ -116,7 +118,12 @@ public abstract class AbstractJdbcProvider extends ObjectEx implements IJdbcProv
 
 	protected void endTran(final Connection connection) {
 		if (isTranNested()) {
-			NESTED.remove();
+			int i = Convert.toInt(NESTED.get());
+			if (--i <= 0) {
+				NESTED.remove();
+			} else {
+				NESTED.set(i);
+			}
 		} else {
 			CONNECTIONS.remove();
 			closeAll(connection, null, null);
