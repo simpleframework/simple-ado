@@ -43,7 +43,7 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			if (id != null) {
 				return IoUtils.deserialize(jedis.get(id.getBytes()));
 			}
-		} catch (final Exception e) {
+		} catch (final Throwable e) {
 			// 释放redis对象
 			getLog().warn(e);
 		} finally {
@@ -69,7 +69,7 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 					jedis.set(id.getBytes(), IoUtils.serialize(val));
 				}
 			}
-		} catch (final Exception e) {
+		} catch (final Throwable e) {
 			getLog().warn(e);
 		} finally {
 			if (jedis != null) {
@@ -86,7 +86,7 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			try {
 				jedis = pool.getResource();
 				jedis.del(id.getBytes());
-			} catch (final Exception e) {
+			} catch (final Throwable e) {
 				getLog().warn(e);
 			} finally {
 				if (jedis != null) {
@@ -104,7 +104,7 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			try {
 				jedis = pool.getResource();
 				jedis.del(id.getBytes());
-			} catch (final Exception e) {
+			} catch (final Throwable e) {
 				getLog().warn(e);
 			} finally {
 				if (jedis != null) {
