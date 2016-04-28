@@ -44,6 +44,7 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 				return IoUtils.deserialize(jedis.get(id.getBytes()));
 			}
 		} catch (final Throwable e) {
+			removeCache(key);
 			// 释放redis对象
 			getLog().warn(e);
 		} finally {
