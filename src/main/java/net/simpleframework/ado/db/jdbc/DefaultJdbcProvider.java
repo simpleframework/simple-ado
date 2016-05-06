@@ -11,6 +11,7 @@ import javax.sql.DataSource;
 import net.simpleframework.ado.ADOException;
 import net.simpleframework.ado.db.common.SQLValue;
 import net.simpleframework.ado.trans.ITransactionCallback;
+import net.simpleframework.common.StringUtils;
 import net.simpleframework.common.object.ObjectEx;
 
 /**
@@ -57,6 +58,7 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 			}
 			return stmt.executeBatch();
 		} catch (final SQLException ex) {
+			oprintln("Error SQL: " + StringUtils.join(sqlArr, "\r\n"));
 			throw ADOException.of(ex);
 		} finally {
 			closeAll(connection, stmt, null);
@@ -75,6 +77,7 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 			}
 			return ps.executeBatch();
 		} catch (final SQLException ex) {
+			oprintln("Error SQL: " + sql);
 			throw ADOException.of(ex);
 		} finally {
 			closeAll(connection, ps, null);
@@ -92,6 +95,7 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 			}
 			return ps.executeUpdate();
 		} catch (final Exception ex) {
+			oprintln("Error SQL: " + sqlVal.getOsql());
 			throw ADOException.of(ex);
 		} finally {
 			closeAll(connection, ps, null);
