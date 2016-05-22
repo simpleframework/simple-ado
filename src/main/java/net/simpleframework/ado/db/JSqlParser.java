@@ -28,6 +28,7 @@ import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
 import com.alibaba.druid.sql.ast.statement.SQLSelectOrderByItem;
 import com.alibaba.druid.sql.ast.statement.SQLSelectQuery;
 import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
+import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLUnionQuery;
 import com.alibaba.druid.sql.parser.SQLParserUtils;
 
@@ -58,8 +59,8 @@ public abstract class JSqlParser {
 		if (nsql != null) {
 			return nsql;
 		}
-		final SQLSelect sqlSelect = SQLParserUtils.createSQLStatementParser(sql, dbType)
-				.parseSelect().getSelect();
+		final SQLSelect sqlSelect = ((SQLSelectStatement) SQLParserUtils.createSQLStatementParser(
+				sql, dbType).parseSelect()).getSelect();
 		sqlSelect.setOrderBy(null);
 		final Object oQuery = sqlSelect.getQuery();
 		SQLSelectQueryBlock qBlock;
@@ -96,13 +97,12 @@ public abstract class JSqlParser {
 		if (columns == null || columns.length == 0) {
 			return sql;
 		}
-		SQLSelect sqlSelect = SQLParserUtils.createSQLStatementParser(sql, dbType).parseSelect()
-				.getSelect();
+		SQLSelect sqlSelect = ((SQLSelectStatement) SQLParserUtils.createSQLStatementParser(sql,
+				dbType).parseSelect()).getSelect();
 		SQLSelectQuery selectQuery = sqlSelect.getQuery();
 		if (selectQuery instanceof SQLUnionQuery) {
-			sqlSelect = SQLParserUtils
-					.createSQLStatementParser("select * from (" + sql + ") _tbl", dbType).parseSelect()
-					.getSelect();
+			sqlSelect = ((SQLSelectStatement) SQLParserUtils.createSQLStatementParser(
+					"select * from (" + sql + ") _tbl", dbType).parseSelect()).getSelect();
 			selectQuery = sqlSelect.getQuery();
 		}
 		final SQLSelectQueryBlock qBlock = (SQLSelectQueryBlock) selectQuery;
@@ -155,13 +155,12 @@ public abstract class JSqlParser {
 		if (!StringUtils.hasText(condition)) {
 			return sql;
 		}
-		SQLSelect sqlSelect = SQLParserUtils.createSQLStatementParser(sql, dbType).parseSelect()
-				.getSelect();
+		SQLSelect sqlSelect = ((SQLSelectStatement) SQLParserUtils.createSQLStatementParser(sql,
+				dbType).parseSelect()).getSelect();
 		SQLSelectQuery selectQuery = sqlSelect.getQuery();
 		if (selectQuery instanceof SQLUnionQuery) {
-			sqlSelect = SQLParserUtils
-					.createSQLStatementParser("select * from (" + sql + ") _tbl", dbType).parseSelect()
-					.getSelect();
+			sqlSelect = ((SQLSelectStatement) SQLParserUtils.createSQLStatementParser(
+					"select * from (" + sql + ") _tbl", dbType).parseSelect()).getSelect();
 			selectQuery = sqlSelect.getQuery();
 		}
 		final SQLSelectQueryBlock qBlock = (SQLSelectQueryBlock) selectQuery;
@@ -175,8 +174,8 @@ public abstract class JSqlParser {
 	}
 
 	public static String toSqlServerLimit(final String sql, final int i, final int fetchSize) {
-		final SQLSelect sqlSelect = SQLParserUtils
-				.createSQLStatementParser(sql, DatabaseMeta.MSSQL_SERVER).parseSelect().getSelect();
+		final SQLSelect sqlSelect = ((SQLSelectStatement) SQLParserUtils.createSQLStatementParser(
+				sql, DatabaseMeta.MSSQL_SERVER).parseSelect()).getSelect();
 		final SQLOrderBy orderBy = sqlSelect.getOrderBy();
 		final String oStr = orderBy == null ? "ORDER BY CURRENT_TIMESTAMP" : SQLUtils
 				.toSQLString(orderBy);
