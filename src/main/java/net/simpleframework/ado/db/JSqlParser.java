@@ -105,18 +105,14 @@ public abstract class JSqlParser {
 					"select * from (" + sql + ") _tbl", dbType).parseSelect()).getSelect();
 			selectQuery = sqlSelect.getQuery();
 		}
-		final SQLSelectQueryBlock qBlock = (SQLSelectQueryBlock) selectQuery;
-		SQLOrderBy orderBy = null;
-		if (BeanUtils.hasProperty(qBlock, "orderBy")) {
-			orderBy = (SQLOrderBy) BeanUtils.getProperty(qBlock, "orderBy");
-			if (orderBy == null) {
-				BeanUtils.setProperty(qBlock, "orderBy", orderBy = new SQLOrderBy());
-			}
-		} else {
-			orderBy = sqlSelect.getOrderBy();
-			if (orderBy == null) {
-				sqlSelect.setOrderBy(orderBy = new SQLOrderBy());
-			}
+
+		SQLOrderBy orderBy = sqlSelect.getOrderBy();
+		if (orderBy == null && selectQuery instanceof SQLSelectQueryBlock) {
+			final SQLSelectQueryBlock qBlock = (SQLSelectQueryBlock) selectQuery;
+			orderBy = qBlock.getOrderBy();
+		}
+		if (orderBy == null) {
+			sqlSelect.setOrderBy(orderBy = new SQLOrderBy());
 		}
 
 		final List<SQLSelectOrderByItem> items = orderBy.getItems();
