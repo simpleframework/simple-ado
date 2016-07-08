@@ -80,6 +80,13 @@ public abstract class LuceneQuery<T> extends AbstractDataQuery<T> {
 
 	private int j = 0;
 
+	protected TopScoreDocCollector search(final IndexSearcher searcher, final int topNum)
+			throws IOException {
+		final TopScoreDocCollector collector = TopScoreDocCollector.create(topNum, false);
+		searcher.search(query, collector);
+		return collector;
+	}
+
 	@Override
 	public T next() {
 		if (query == null) {
@@ -101,8 +108,7 @@ public abstract class LuceneQuery<T> extends AbstractDataQuery<T> {
 		try {
 			if (topDocs == null || j >= fetchSize) {
 				final int topNum = i + fetchSize;
-				final TopScoreDocCollector collector = TopScoreDocCollector.create(topNum, false);
-				searcher.search(query, collector);
+				final TopScoreDocCollector collector = search(searcher, topNum);
 				topDocs = collector.topDocs(i, topNum);
 				j = 0;
 			}
