@@ -31,9 +31,9 @@ public abstract class LuceneQuery<T> extends AbstractDataQuery<T> {
 		this.query = query;
 	}
 
-	private DirectoryReader _reader;
+	protected DirectoryReader _reader;
 
-	private IndexSearcher _searcher;
+	protected IndexSearcher _searcher;
 
 	protected IndexSearcher getIndexSearcher() {
 		if (_searcher == null) {
@@ -46,7 +46,7 @@ public abstract class LuceneQuery<T> extends AbstractDataQuery<T> {
 		return _searcher;
 	}
 
-	private int fetchSize = 30;
+	protected int fetchSize = 30;
 
 	@Override
 	public int getFetchSize() {
@@ -76,7 +76,7 @@ public abstract class LuceneQuery<T> extends AbstractDataQuery<T> {
 		topDocs = null;
 	}
 
-	private TopDocs topDocs;
+	protected TopDocs topDocs;
 
 	private int j = 0;
 

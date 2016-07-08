@@ -44,9 +44,9 @@ import org.apache.lucene.util.Version;
 public abstract class AbstractLuceneManager extends AbstractADOManager implements ILuceneManager {
 	final Version version = Version.LUCENE_4_9;
 
-	private FSDirectory directory;
+	protected FSDirectory directory;
 
-	private Analyzer defaultAnalyzer;
+	protected Analyzer defaultAnalyzer;
 
 	public AbstractLuceneManager(final File indexPath) {
 		try {
@@ -228,7 +228,7 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 		return obj;
 	}
 
-	private Query getQuery(final String[] queryFields, final String queryString) {
+	protected Query getQuery(final String[] queryFields, final String queryString) {
 		Query query = null;
 		QueryParser qp;
 		if (StringUtils.hasText(queryString) && indexExists()
@@ -285,7 +285,7 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 
 	protected abstract String[] getQueryFields();
 
-	private void closeWriter(final IndexWriter indexWriter) {
+	protected void closeWriter(final IndexWriter indexWriter) {
 		try {
 			if (indexWriter != null) {
 				indexWriter.close();
