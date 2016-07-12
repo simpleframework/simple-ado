@@ -18,7 +18,7 @@ public class LuceneDocument {
 	final Document doc;
 
 	/* 当前查询的评分 */
-	float score;
+	public float score;
 
 	public LuceneDocument(final Document document, final float score) {
 		this.doc = document == null ? new Document() : document;
