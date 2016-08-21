@@ -86,8 +86,9 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 				return new SQLValue(SQLBuilder.getSelectUniqueSQL(getEntityTable(), columns),
 						paramsValue != null ? paramsValue.getValues() : null);
 			} else if (clazz.equals(ExpressionValue.class)) {
-				return new SQLValue(SQLBuilder.getSelectExpressionSQL(getEntityTable(), columns,
-						((ExpressionValue) paramsValue).getExpression()),
+				return new SQLValue(
+						SQLBuilder.getSelectExpressionSQL(getEntityTable(), columns,
+								((ExpressionValue) paramsValue).getExpression()),
 						paramsValue != null ? paramsValue.getValues() : null);
 			}
 		}

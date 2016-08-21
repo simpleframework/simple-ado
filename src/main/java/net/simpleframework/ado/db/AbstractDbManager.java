@@ -181,8 +181,8 @@ public abstract class AbstractDbManager extends AbstractADOManager implements ID
 		return executeQuery(sqlVal, new IQueryExtractor<Map<String, Object>>() {
 
 			@Override
-			public Map<String, Object> extractData(final ResultSet rs) throws SQLException,
-					ADOException {
+			public Map<String, Object> extractData(final ResultSet rs)
+					throws SQLException, ADOException {
 				return rs.next() ? mapRowData(columns, rs) : null;
 			}
 		});

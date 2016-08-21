@@ -33,7 +33,8 @@ public class OracleJdbcDialect extends DefaultJdbcDialect {
 		Object obj = super.getResultSetValue(rs, columnIndex, requiredType);
 		if (obj != null) {
 			final String className = obj.getClass().getName();
-			if ("oracle.sql.TIMESTAMP".equals(className) || "oracle.sql.TIMESTAMPTZ".equals(className)) {
+			if ("oracle.sql.TIMESTAMP".equals(className)
+					|| "oracle.sql.TIMESTAMPTZ".equals(className)) {
 				obj = rs.getTimestamp(columnIndex);
 			} else if (className.startsWith("oracle.sql.DATE")) {
 				final String metaDataClassName = rs.getMetaData().getColumnClassName(columnIndex);

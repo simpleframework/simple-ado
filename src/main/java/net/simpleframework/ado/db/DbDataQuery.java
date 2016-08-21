@@ -98,8 +98,8 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 	@Override
 	public int getCount() {
 		if (count < 0) {
-			final SQLValue countSql = new SQLValue(getJdbcProvider().getJdbcDialect().toCountSQL(
-					sqlVal.getSql()), sqlVal.getValues());
+			final SQLValue countSql = new SQLValue(
+					getJdbcProvider().getJdbcDialect().toCountSQL(sqlVal.getSql()), sqlVal.getValues());
 			count = getJdbcProvider().queryObject(countSql, new IQueryExtractor<Integer>() {
 				@Override
 				public Integer extractData(final ResultSet rs) throws SQLException, ADOException {
@@ -262,10 +262,9 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 	}
 
 	public Object doResultSetMetaData(final ResultSetMetaDataCallback callback) {
-		return getJdbcProvider().queryObject(
-				new SQLValue(getJdbcProvider().getJdbcDialect()
-						.toConditionSQL(sqlVal.getSql(), "1 = 2"), sqlVal.getValues()),
-				new IQueryExtractor<Object>() {
+		return getJdbcProvider().queryObject(new SQLValue(
+				getJdbcProvider().getJdbcDialect().toConditionSQL(sqlVal.getSql(), "1 = 2"),
+				sqlVal.getValues()), new IQueryExtractor<Object>() {
 					@Override
 					public Object extractData(final ResultSet rs) throws SQLException, ADOException {
 						return callback.doResultSetMetaData(rs.getMetaData());

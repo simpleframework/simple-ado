@@ -6,18 +6,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Map;
 
-import net.simpleframework.ado.ADOException;
-import net.simpleframework.ado.AbstractADOManager;
-import net.simpleframework.ado.bean.IIdBeanAware;
-import net.simpleframework.ado.query.DataQueryUtils;
-import net.simpleframework.ado.query.IDataQuery;
-import net.simpleframework.common.BeanUtils;
-import net.simpleframework.common.Convert;
-import net.simpleframework.common.StringUtils;
-import net.simpleframework.common.coll.KVMap;
-import net.simpleframework.common.object.ObjectFactory;
-import net.simpleframework.common.web.html.HtmlUtils;
-
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer;
@@ -33,6 +21,18 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+
+import net.simpleframework.ado.ADOException;
+import net.simpleframework.ado.AbstractADOManager;
+import net.simpleframework.ado.bean.IIdBeanAware;
+import net.simpleframework.ado.query.DataQueryUtils;
+import net.simpleframework.ado.query.IDataQuery;
+import net.simpleframework.common.BeanUtils;
+import net.simpleframework.common.Convert;
+import net.simpleframework.common.StringUtils;
+import net.simpleframework.common.coll.KVMap;
+import net.simpleframework.common.object.ObjectFactory;
+import net.simpleframework.common.web.html.HtmlUtils;
 
 /**
  * Licensed under the Apache License, Version 2.0
@@ -232,7 +232,8 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 		Query query = null;
 		QueryParser qp;
 		if (StringUtils.hasText(queryString) && indexExists()
-				&& (qp = new MultiFieldQueryParser(version, queryFields, getDefaultAnalyzer())) != null) {
+				&& (qp = new MultiFieldQueryParser(version, queryFields,
+						getDefaultAnalyzer())) != null) {
 			try {
 				query = qp.parse(queryString.trim());
 			} catch (final ParseException e) {
@@ -264,7 +265,8 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 	}
 
 	@Override
-	public IDataQuery<Map<String, Object>> query(final String[] queryFields, final String queryString) {
+	public IDataQuery<Map<String, Object>> query(final String[] queryFields,
+			final String queryString) {
 		final Query query = getQuery(queryFields, queryString);
 		if (query == null) {
 			return DataQueryUtils.nullQuery();

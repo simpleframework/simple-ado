@@ -353,8 +353,8 @@ public class DefaultJdbcDialect extends ObjectEx implements IJdbcDialect {
 						final FileInputStream fStream = (FileInputStream) inValue;
 						ps.setBinaryStream(paramIndex, fStream, (int) fStream.getChannel().size());
 					} else {
-						final File file = new File(System.getProperty("java.io.tmpdir")
-								+ ObjectUtils.hashStr(inValue));
+						final File file = new File(
+								System.getProperty("java.io.tmpdir") + ObjectUtils.hashStr(inValue));
 						FileUtils.copyFile((InputStream) inValue, file);
 						final FileInputStream fStream = new FileInputStream(file);
 						ps.setBinaryStream(paramIndex, fStream, (int) fStream.getChannel().size());

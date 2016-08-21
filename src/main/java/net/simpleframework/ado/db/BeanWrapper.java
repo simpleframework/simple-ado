@@ -83,8 +83,8 @@ public class BeanWrapper<T> extends ObjectEx {
 			final int iCol = JdbcUtils.lookupColumnIndex(rsmd, k);
 			if (iCol > 0) {
 				final Object val2 = _bean.getAttr(k);
-				final Object val = dialect.getResultSetValue(rs, iCol, val2 != null ? val2.getClass()
-						: null);
+				final Object val = dialect.getResultSetValue(rs, iCol,
+						val2 != null ? val2.getClass() : null);
 				if (!ObjectUtils.objectEquals(val2, val)) {
 					_bean.setAttr(k, val);
 				}

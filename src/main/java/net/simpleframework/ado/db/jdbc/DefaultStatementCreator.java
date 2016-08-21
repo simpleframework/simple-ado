@@ -38,8 +38,8 @@ public class DefaultStatementCreator extends ObjectEx implements IStatementCreat
 	@Override
 	public PreparedStatement prepareStatement(final Connection connection, final SQLValue sqlVal,
 			final int resultSetType, final int resultSetConcurrency) throws SQLException {
-		final PreparedStatement ps = getNativeConnection(connection).prepareStatement(
-				sqlVal.getSql(), resultSetType, resultSetConcurrency);
+		final PreparedStatement ps = getNativeConnection(connection).prepareStatement(sqlVal.getSql(),
+				resultSetType, resultSetConcurrency);
 		final Object[] values = getParameterValues(sqlVal.getValues());
 		if (values != null) {
 			for (int i = 1; i <= values.length; i++) {
@@ -104,8 +104,9 @@ public class DefaultStatementCreator extends ObjectEx implements IStatementCreat
 						getRawConnectionMethod, null, new Object[] { RAW_CONNECTION });
 			} else if (clazzName.startsWith("weblogic.jdbc")) {
 				if (getVendorConnectionMethod == null) {
-					getVendorConnectionMethod = ClassUtils.forName(
-							"weblogic.jdbc.extensions.WLConnection").getMethod("getVendorConnection");
+					getVendorConnectionMethod = ClassUtils
+							.forName("weblogic.jdbc.extensions.WLConnection")
+							.getMethod("getVendorConnection");
 				}
 				return (Connection) ClassUtils.invoke(getVendorConnectionMethod, connection);
 			}

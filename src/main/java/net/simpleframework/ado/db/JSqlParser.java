@@ -6,13 +6,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import net.simpleframework.ado.EOrder;
-import net.simpleframework.ado.db.jdbc.DatabaseMeta;
-import net.simpleframework.ado.db.jdbc.JdbcUtils;
-import net.simpleframework.common.BeanUtils;
-import net.simpleframework.common.StringUtils;
-import net.simpleframework.common.coll.LRUMap;
-
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLOrderBy;
@@ -31,6 +24,13 @@ import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLUnionQuery;
 import com.alibaba.druid.sql.parser.SQLParserUtils;
+
+import net.simpleframework.ado.EOrder;
+import net.simpleframework.ado.db.jdbc.DatabaseMeta;
+import net.simpleframework.ado.db.jdbc.JdbcUtils;
+import net.simpleframework.common.BeanUtils;
+import net.simpleframework.common.StringUtils;
+import net.simpleframework.common.coll.LRUMap;
 
 /**
  * Licensed under the Apache License, Version 2.0
@@ -59,8 +59,8 @@ public abstract class JSqlParser {
 		if (nsql != null) {
 			return nsql;
 		}
-		final SQLSelect sqlSelect = ((SQLSelectStatement) SQLParserUtils.createSQLStatementParser(
-				sql, dbType).parseSelect()).getSelect();
+		final SQLSelect sqlSelect = ((SQLSelectStatement) SQLParserUtils
+				.createSQLStatementParser(sql, dbType).parseSelect()).getSelect();
 		sqlSelect.setOrderBy(null);
 		final Object oQuery = sqlSelect.getQuery();
 		SQLSelectQueryBlock qBlock;
@@ -97,12 +97,13 @@ public abstract class JSqlParser {
 		if (columns == null || columns.length == 0) {
 			return sql;
 		}
-		SQLSelect sqlSelect = ((SQLSelectStatement) SQLParserUtils.createSQLStatementParser(sql,
-				dbType).parseSelect()).getSelect();
+		SQLSelect sqlSelect = ((SQLSelectStatement) SQLParserUtils
+				.createSQLStatementParser(sql, dbType).parseSelect()).getSelect();
 		SQLSelectQuery selectQuery = sqlSelect.getQuery();
 		if (selectQuery instanceof SQLUnionQuery) {
-			sqlSelect = ((SQLSelectStatement) SQLParserUtils.createSQLStatementParser(
-					"select * from (" + sql + ") _tbl", dbType).parseSelect()).getSelect();
+			sqlSelect = ((SQLSelectStatement) SQLParserUtils
+					.createSQLStatementParser("select * from (" + sql + ") _tbl", dbType).parseSelect())
+							.getSelect();
 			selectQuery = sqlSelect.getQuery();
 		}
 
@@ -147,16 +148,18 @@ public abstract class JSqlParser {
 		return SQLUtils.toSQLString(sqlSelect, dbType);
 	}
 
-	public static String addCondition(final String sql, final String dbType, final String condition) {
+	public static String addCondition(final String sql, final String dbType,
+			final String condition) {
 		if (!StringUtils.hasText(condition)) {
 			return sql;
 		}
-		SQLSelect sqlSelect = ((SQLSelectStatement) SQLParserUtils.createSQLStatementParser(sql,
-				dbType).parseSelect()).getSelect();
+		SQLSelect sqlSelect = ((SQLSelectStatement) SQLParserUtils
+				.createSQLStatementParser(sql, dbType).parseSelect()).getSelect();
 		SQLSelectQuery selectQuery = sqlSelect.getQuery();
 		if (selectQuery instanceof SQLUnionQuery) {
-			sqlSelect = ((SQLSelectStatement) SQLParserUtils.createSQLStatementParser(
-					"select * from (" + sql + ") _tbl", dbType).parseSelect()).getSelect();
+			sqlSelect = ((SQLSelectStatement) SQLParserUtils
+					.createSQLStatementParser("select * from (" + sql + ") _tbl", dbType).parseSelect())
+							.getSelect();
 			selectQuery = sqlSelect.getQuery();
 		}
 		final SQLSelectQueryBlock qBlock = (SQLSelectQueryBlock) selectQuery;
@@ -164,17 +167,18 @@ public abstract class JSqlParser {
 		if (qBlock.getWhere() == null) {
 			qBlock.setWhere(expr);
 		} else {
-			qBlock.setWhere(new SQLBinaryOpExpr(qBlock.getWhere(), SQLBinaryOperator.BooleanAnd, expr));
+			qBlock.setWhere(
+					new SQLBinaryOpExpr(qBlock.getWhere(), SQLBinaryOperator.BooleanAnd, expr));
 		}
 		return SQLUtils.toSQLString(sqlSelect, dbType);
 	}
 
 	public static String toSqlServerLimit(final String sql, final int i, final int fetchSize) {
-		final SQLSelect sqlSelect = ((SQLSelectStatement) SQLParserUtils.createSQLStatementParser(
-				sql, DatabaseMeta.MSSQL_SERVER).parseSelect()).getSelect();
+		final SQLSelect sqlSelect = ((SQLSelectStatement) SQLParserUtils
+				.createSQLStatementParser(sql, DatabaseMeta.MSSQL_SERVER).parseSelect()).getSelect();
 		final SQLOrderBy orderBy = sqlSelect.getOrderBy();
-		final String oStr = orderBy == null ? "ORDER BY CURRENT_TIMESTAMP" : SQLUtils
-				.toSQLString(orderBy);
+		final String oStr = orderBy == null ? "ORDER BY CURRENT_TIMESTAMP"
+				: SQLUtils.toSQLString(orderBy);
 		sqlSelect.setOrderBy(null);
 		final String sql2 = SQLUtils.toSQLString(sqlSelect, DatabaseMeta.MSSQL_SERVER);
 

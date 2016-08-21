@@ -69,8 +69,8 @@ public class DbEntityTable implements Serializable {
 	@SuppressWarnings("unchecked")
 	public Map<String, DbTableColumn> getTableColumns() {
 		final Class<?> beanClass = getBeanClass();
-		return beanClass == null ? Collections.EMPTY_MAP : DbTableColumn
-				.getTableColumns(getBeanClass());
+		return beanClass == null ? Collections.EMPTY_MAP
+				: DbTableColumn.getTableColumns(getBeanClass());
 	}
 
 	public String getSqlName(final String propertyName) {

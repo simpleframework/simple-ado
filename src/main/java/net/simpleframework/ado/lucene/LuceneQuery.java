@@ -2,9 +2,6 @@ package net.simpleframework.ado.lucene;
 
 import java.io.IOException;
 
-import net.simpleframework.ado.ADOException;
-import net.simpleframework.ado.query.AbstractDataQuery;
-
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
@@ -13,6 +10,9 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.search.TotalHitCountCollector;
 import org.apache.lucene.store.Directory;
+
+import net.simpleframework.ado.ADOException;
+import net.simpleframework.ado.query.AbstractDataQuery;
 
 /**
  * Licensed under the Apache License, Version 2.0

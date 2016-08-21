@@ -28,8 +28,8 @@ import net.simpleframework.common.Convert;
  * @author 陈侃(cknet@126.com, 13910090885) https://github.com/simpleframework
  *         http://www.simpleframework.net
  */
-public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T> implements
-		IDbEntityCache {
+public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
+		implements IDbEntityCache {
 	/* 缓存key->id */
 	protected Map<String, String> idCache = new ConcurrentHashMap<String, String>();
 
@@ -156,7 +156,8 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 		} else {
 			final BeanWrapper<T> wrapper = new BeanWrapper<T>(columns, getBeanClass());
 			final IJdbcProvider jdbcProvider = getJdbcProvider();
-			return new DbDataQuery<T>(dbFactory, this, createSQLValue(null /* columns */, paramsValue)) {
+			return new DbDataQuery<T>(dbFactory, this,
+					createSQLValue(null /* columns */, paramsValue)) {
 				@SuppressWarnings("unchecked")
 				@Override
 				public T mapRow(final ResultSet rs, final int rowNum) throws SQLException {
@@ -213,8 +214,8 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 		if (getEntityTable().isNoCache()) {
 			return super.queryMapSet(columns, paramsValue);
 		} else {
-			return new DbDataQuery<Map<String, Object>>(dbFactory, this, createSQLValue(columns,
-					paramsValue)) {
+			return new DbDataQuery<Map<String, Object>>(dbFactory, this,
+					createSQLValue(columns, paramsValue)) {
 				@SuppressWarnings("unchecked")
 				@Override
 				public Map<String, Object> mapRow(final ResultSet rs, final int rowNum)
