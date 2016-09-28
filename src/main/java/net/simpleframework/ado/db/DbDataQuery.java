@@ -150,6 +150,7 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 					}
 				}
 			} catch (final Exception e) {
+				close();
 				throw ADOException.of(e);
 			}
 		} else if (i < getCount() && i >= 0) {
