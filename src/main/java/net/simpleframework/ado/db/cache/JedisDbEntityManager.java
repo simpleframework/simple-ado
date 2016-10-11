@@ -42,7 +42,12 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			jedis = pool.getResource();
 			final String id = idCache.get(key);
 			if (id != null) {
-				return IoUtils.deserialize(jedis.get(id.getBytes()));
+				final byte[] bytes = jedis.get(id.getBytes());
+				if (bytes != null) {
+					return IoUtils.deserialize(bytes);
+				} else {
+					removeCache(key);
+				}
 			}
 		} catch (final Throwable e) {
 			removeCache(key);
