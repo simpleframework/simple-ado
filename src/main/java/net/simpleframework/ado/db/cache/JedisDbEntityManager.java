@@ -2,7 +2,6 @@ package net.simpleframework.ado.db.cache;
 
 import net.simpleframework.ado.db.DbEntityTable;
 import net.simpleframework.common.IoUtils;
-import net.simpleframework.common.StringUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -42,11 +41,8 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 		try {
 			jedis = pool.getResource();
 			final String id = idCache.get(key);
-			if (StringUtils.hasText(id)) {
-				final byte[] bytes = id.getBytes();
-				if (jedis.exists(bytes)) {
-					return IoUtils.deserialize(jedis.get(bytes));
-				}
+			if (id != null) {
+				return IoUtils.deserialize(jedis.get(id.getBytes()));
 			}
 		} catch (final Throwable e) {
 			removeCache(key);
@@ -67,7 +63,7 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 		try {
 			jedis = pool.getResource();
 			final String id = getId(val);
-			if (StringUtils.hasText(id)) {
+			if (id != null) {
 				idCache.put(key, id);
 				if (expire > 0) {
 					jedis.setex(id.getBytes(), expire, IoUtils.serialize(val));
@@ -87,7 +83,7 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 	@Override
 	public void removeCache(final String key) {
 		final String id = idCache.remove(key);
-		if (StringUtils.hasText(id)) {
+		if (id != null) {
 			Jedis jedis = null;
 			try {
 				jedis = pool.getResource();
@@ -105,7 +101,7 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 	@Override
 	public void removeVal(final Object val) {
 		final String id = getId(val);
-		if (StringUtils.hasText(id)) {
+		if (id != null) {
 			Jedis jedis = null;
 			try {
 				jedis = pool.getResource();
