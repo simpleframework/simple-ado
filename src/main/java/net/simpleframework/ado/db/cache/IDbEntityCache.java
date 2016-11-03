@@ -1,5 +1,7 @@
 package net.simpleframework.ado.db.cache;
 
+import net.simpleframework.common.coll.KVMap;
+
 /**
  * Licensed under the Apache License, Version 2.0
  * 
@@ -37,4 +39,6 @@ public interface IDbEntityCache {
 	 * @param maxCacheSize
 	 */
 	void setMaxCacheSize(int maxCacheSize);
+
+	static ThreadLocal<KVMap> REQUEST_THREAD_CACHE = new ThreadLocal<KVMap>();
 }

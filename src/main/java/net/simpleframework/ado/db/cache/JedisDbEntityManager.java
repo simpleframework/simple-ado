@@ -2,6 +2,7 @@ package net.simpleframework.ado.db.cache;
 
 import net.simpleframework.ado.db.DbEntityTable;
 import net.simpleframework.common.IoUtils;
+import net.simpleframework.common.coll.KVMap;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -37,24 +38,37 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 
 	@Override
 	public Object getCache(final String key) {
+		final KVMap kv = REQUEST_THREAD_CACHE.get();
 		Jedis jedis = null;
 		try {
-			jedis = pool.getResource();
 			final String id = idCache.get(key);
-			if (id != null) {
-				return IoUtils.deserialize(jedis.get(id.getBytes()));
+			if (id == null) {
+				return null;
 			}
+
+			Object val = null;
+			if (kv != null) {
+				val = kv.get(id);
+			}
+			if (val == null) {
+				jedis = pool.getResource();
+				val = IoUtils.deserialize(jedis.get(id.getBytes()));
+				if (kv != null) {
+					kv.put(id, val);
+				}
+			}
+			return val;
 		} catch (final Throwable e) {
 			removeCache(key);
 			// 释放redis对象
 			getLog().warn(e);
+			return null;
 		} finally {
 			// 返还到连接池
 			if (jedis != null) {
 				jedis.close();
 			}
 		}
-		return null;
 	}
 
 	@Override
