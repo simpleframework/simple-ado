@@ -152,21 +152,20 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 			final IJdbcTransactionEvent event) {
 		Connection connection = null;
 		try {
-			synchronized (this) {
-				connection = beginTran();
-				if (event != null) {
-					event.onExecute(connection);
-				}
-				final T t = callback.onTransactionCallback();
-				// 当返回值含有"_throwable"属性，则回滚，可能被调用者try-catch掉
-				if (t instanceof ObjectEx
-						&& ((ObjectEx) t).getAttr("_throwable") instanceof Throwable) {
-					rollback(connection);
-				} else {
-					commitTran(connection);
-				}
-				return t;
+			// synchronized (this) {
+			connection = beginTran();
+			if (event != null) {
+				event.onExecute(connection);
 			}
+			final T t = callback.onTransactionCallback();
+			// 当返回值含有"_throwable"属性，则回滚，可能被调用者try-catch掉
+			if (t instanceof ObjectEx && ((ObjectEx) t).getAttr("_throwable") instanceof Throwable) {
+				rollback(connection);
+			} else {
+				commitTran(connection);
+			}
+			return t;
+			// }
 		} catch (final Throwable th) {
 			rollback(connection);
 
