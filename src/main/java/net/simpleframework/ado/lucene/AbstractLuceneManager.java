@@ -51,10 +51,14 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 
 	public AbstractLuceneManager(final File indexPath) {
 		try {
-			this.directory = FSDirectory.open(indexPath, new SimpleFSLockFactory());
+			this.directory = createFSDirectory(indexPath);
 		} catch (final IOException e) {
 			throw ADOException.of(e);
 		}
+	}
+
+	protected FSDirectory createFSDirectory(final File indexPath) throws IOException {
+		return FSDirectory.open(indexPath, new SimpleFSLockFactory());
 	}
 
 	public File getIndexPath() {
