@@ -20,6 +20,7 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.store.SimpleFSLockFactory;
 import org.apache.lucene.util.Version;
 
 import net.simpleframework.ado.ADOException;
@@ -50,7 +51,7 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 
 	public AbstractLuceneManager(final File indexPath) {
 		try {
-			this.directory = FSDirectory.open(indexPath);
+			this.directory = FSDirectory.open(indexPath, new SimpleFSLockFactory());
 		} catch (final IOException e) {
 			throw ADOException.of(e);
 		}
