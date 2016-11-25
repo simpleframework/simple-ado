@@ -1,7 +1,9 @@
 package net.simpleframework.ado.db.cache;
 
+import java.io.IOException;
+
 import net.simpleframework.ado.db.DbEntityTable;
-import net.simpleframework.common.IoUtils;
+import net.simpleframework.common.IoUtils_kryo;
 import net.simpleframework.common.coll.KVMap;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -52,7 +54,7 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			}
 			if (val == null) {
 				jedis = pool.getResource();
-				val = IoUtils.deserialize(jedis.get(id.getBytes()), getBeanClass());
+				val = deserialize(jedis.get(id.getBytes()));
 				if (kv != null) {
 					kv.put(id, val);
 				}
@@ -80,9 +82,9 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			if (id != null) {
 				idCache.put(key, id);
 				if (expire > 0) {
-					jedis.setex(id.getBytes(), expire, IoUtils.serialize(val, getBeanClass()));
+					jedis.setex(id.getBytes(), expire, serialize(val));
 				} else {
-					jedis.set(id.getBytes(), IoUtils.serialize(val, getBeanClass()));
+					jedis.set(id.getBytes(), serialize(val));
 				}
 			}
 		} catch (final Throwable e) {
@@ -141,5 +143,13 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 
 	@Override
 	public void setMaxCacheSize(final int maxCacheSize) {
+	}
+
+	private byte[] serialize(final Object obj) throws IOException {
+		return IoUtils_kryo.serialize(obj, getBeanClass());
+	}
+
+	private Object deserialize(final byte[] bytes) throws IOException, ClassNotFoundException {
+		return IoUtils_kryo.deserialize(bytes, getBeanClass());
 	}
 }
