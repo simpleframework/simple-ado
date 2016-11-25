@@ -52,7 +52,7 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			}
 			if (val == null) {
 				jedis = pool.getResource();
-				val = IoUtils.deserialize(jedis.get(id.getBytes()));
+				val = IoUtils.deserialize(jedis.get(id.getBytes()), getBeanClass());
 				if (kv != null) {
 					kv.put(id, val);
 				}
@@ -80,9 +80,9 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			if (id != null) {
 				idCache.put(key, id);
 				if (expire > 0) {
-					jedis.setex(id.getBytes(), expire, IoUtils.serialize(val));
+					jedis.setex(id.getBytes(), expire, IoUtils.serialize(val, getBeanClass()));
 				} else {
-					jedis.set(id.getBytes(), IoUtils.serialize(val));
+					jedis.set(id.getBytes(), IoUtils.serialize(val, getBeanClass()));
 				}
 			}
 		} catch (final Throwable e) {
