@@ -40,7 +40,7 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 
 	protected int maxCacheSize;
 	{
-		setMaxCacheSize(5000);
+		setMaxCacheSize(2000);
 	}
 
 	public int getMaxCacheSize() {
