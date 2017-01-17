@@ -26,10 +26,18 @@ public class DbEntityTable implements Serializable {
 
 	private ColumnData defaultOrder;
 
+	/* cache的最大值 */
+	private int maxCacheSize;
+
 	public DbEntityTable(final Class<?> beanClass, final String name) {
+		this(beanClass, name, 0);
+	}
+
+	public DbEntityTable(final Class<?> beanClass, final String name, final int maxCacheSize) {
 		this.beanClass = beanClass;
 		this.name = name;
 		this.uniqueColumns = new String[] { "id" };
+		this.maxCacheSize = maxCacheSize;
 	}
 
 	public String getName() {
@@ -61,6 +69,14 @@ public class DbEntityTable implements Serializable {
 	public DbEntityTable setDefaultOrder(final ColumnData defaultOrder) {
 		this.defaultOrder = defaultOrder;
 		return this;
+	}
+
+	public int getMaxCacheSize() {
+		return maxCacheSize;
+	}
+
+	public void setMaxCacheSize(final int maxCacheSize) {
+		this.maxCacheSize = maxCacheSize;
 	}
 
 	public Class<?> getBeanClass() {

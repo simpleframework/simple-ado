@@ -20,6 +20,10 @@ public class MapDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 
 	public MapDbEntityManager(final DbEntityTable entityTable) {
 		super(entityTable);
+		final int maxCacheSize = entityTable.getMaxCacheSize();
+		if (maxCacheSize > 0) {
+			setMaxCacheSize(maxCacheSize);
+		}
 	}
 
 	public MapDbEntityManager() {
