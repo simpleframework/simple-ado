@@ -71,9 +71,10 @@ public class MapDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 	public void removeVal(final Object val) {
 		final String id = getId(val);
 		if (id != null) {
+			// 删除值缓存
 			vCache.remove(id);
 			// 删除id缓存
-			final Set<String> keys = kCache.get(id);
+			final Set<String> keys = kCache.remove(id);
 			if (keys != null) {
 				for (final String key : keys) {
 					idCache.remove(key);

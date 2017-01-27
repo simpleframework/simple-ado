@@ -121,7 +121,10 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			Jedis jedis = null;
 			try {
 				jedis = pool.getResource();
-				jedis.del(id.getBytes());
+				if (jedis.del(id.getBytes()) == 0) {
+					getLog().warn("jedis: del->0");
+					jedis.expire(id, 0);
+				}
 			} catch (final Throwable e) {
 				getLog().warn(e);
 			} finally {
