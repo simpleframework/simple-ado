@@ -372,7 +372,7 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 
 	@Override
 	public <M> M doExecuteTransaction(final ITransactionCallback<M> callback) {
-		return getJdbcProvider().doExecuteTransaction(callback, null);
+		return getJdbcProvider().doExecuteTransaction(callback);
 	}
 
 	/* utils */

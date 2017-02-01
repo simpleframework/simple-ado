@@ -148,16 +148,27 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 	}
 
 	@Override
-	public <T> T doExecuteTransaction(final ITransactionCallback<T> callback,
-			final IJdbcTransactionEvent event) {
+	public boolean isAutoCommit() {
+		try {
+			return getConnection().getAutoCommit();
+		} catch (final SQLException e) {
+			getLog().error(e);
+		}
+		return true;
+	}
+
+	@Override
+	public <T> T doExecuteTransaction(final ITransactionCallback<T> callback) {
+		IJdbcTransactionEvent event = null;
 		Connection connection = null;
 		try {
 			// synchronized (this) {
 			connection = beginTran();
-			if (event != null) {
-				event.onExecute(connection);
-			}
 			final T t = callback.onTransactionCallback();
+
+			// 执行后缺省事件
+			event = IJdbcTransactionEvent.ON_AFTER_EXECUTE.get();
+
 			// 当返回值含有"_throwable"属性，则回滚，可能被调用者try-catch掉
 			if (t instanceof ObjectEx && ((ObjectEx) t).getAttr("_throwable") instanceof Throwable) {
 				rollback(connection);
@@ -168,7 +179,6 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 			// }
 		} catch (final Throwable th) {
 			rollback(connection);
-
 			if (event != null) {
 				event.onThrowable(connection);
 			}
@@ -178,6 +188,7 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 			if (event != null) {
 				event.onFinally(connection);
 			}
+			IJdbcTransactionEvent.ON_AFTER_EXECUTE.remove();
 		}
 	}
 

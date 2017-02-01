@@ -98,10 +98,11 @@ public interface IJdbcProvider {
 	 * 执行事务及回调
 	 * 
 	 * @param callback
-	 * @param event
 	 * @return
 	 */
-	<T> T doExecuteTransaction(ITransactionCallback<T> callback, IJdbcTransactionEvent event);
+	<T> T doExecuteTransaction(ITransactionCallback<T> callback);
+
+	boolean isAutoCommit();
 
 	void closeAll(Connection connection, Statement stat, ResultSet rs);
 }

@@ -1,13 +1,11 @@
 package net.simpleframework.ado.db;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
 import net.simpleframework.ado.ADOException;
 import net.simpleframework.ado.db.common.SQLValue;
-import net.simpleframework.ado.db.jdbc.IJdbcTransactionEvent;
 import net.simpleframework.ado.db.jdbc.IQueryExtractor;
 import net.simpleframework.ado.trans.ITransactionCallback;
 
@@ -75,25 +73,8 @@ public class DbQueryManager extends AbstractDbManager implements IDbQueryManager
 		return createQueryEntitySet(null, value, beanClass);
 	}
 
-	private final IJdbcTransactionEvent transactionEvent = new IJdbcTransactionEvent() {
-		@Override
-		public void onExecute(final Connection connection) {
-		}
-
-		@Override
-		public void onThrowable(final Connection connection) {
-			for (final IDbEntityManager<?> mgr : dbFactory.allEntityManager()) {
-				mgr.reset();
-			}
-		}
-
-		@Override
-		public void onFinally(final Connection connection) {
-		}
-	};
-
 	@Override
 	public <T> T doExecuteTransaction(final ITransactionCallback<T> callback) {
-		return getJdbcProvider().doExecuteTransaction(callback, transactionEvent);
+		return getJdbcProvider().doExecuteTransaction(callback);
 	}
 }

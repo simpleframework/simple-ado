@@ -1,7 +1,10 @@
 package net.simpleframework.ado.db.cache;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,6 +21,7 @@ import net.simpleframework.ado.db.common.SQLValue;
 import net.simpleframework.ado.db.event.IDbEntityListener;
 import net.simpleframework.ado.db.event.IDbListener;
 import net.simpleframework.ado.db.jdbc.IJdbcProvider;
+import net.simpleframework.ado.db.jdbc.IJdbcTransactionEvent;
 import net.simpleframework.ado.query.DataQueryUtils;
 import net.simpleframework.common.BeanUtils;
 import net.simpleframework.common.Convert;
@@ -115,7 +119,11 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 			return super.delete(l, paramsValue);
 		} finally {
 			for (final T t : keys) {
-				removeVal(t);
+				if (getJdbcProvider().isAutoCommit()) {
+					removeVal(t);
+				} else {
+					getTransactionEvent().addRobject(this, t);
+				}
 			}
 		}
 	}
@@ -127,9 +135,49 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 		} finally {
 			// 同一个bean，由于条件不同，可能有多个key，当更新时，直接从缓存删掉(更好办法？)
 			for (final T t : objects) {
-				removeVal(t);
+				if (getJdbcProvider().isAutoCommit()) {
+					removeVal(t);
+				} else {
+					getTransactionEvent().addRobject(this, t);
+				}
 			}
 		}
+	}
+
+	protected class JdbcTransactionEvent implements IJdbcTransactionEvent {
+
+		private final Map<AbstractCacheDbEntityManager<T>, List<T>> removes = new HashMap<AbstractCacheDbEntityManager<T>, List<T>>();
+
+		public void addRobject(final AbstractCacheDbEntityManager<T> mgr, final T t) {
+			List<T> list = removes.get(mgr);
+			if (list == null) {
+				removes.put(mgr, list = new ArrayList<T>());
+			}
+			list.add(t);
+		}
+
+		@Override
+		public void onThrowable(final Connection connection) {
+		}
+
+		@Override
+		public void onFinally(final Connection connection) {
+			for (final Map.Entry<AbstractCacheDbEntityManager<T>, List<T>> e : removes.entrySet()) {
+				final AbstractCacheDbEntityManager<T> mgr = e.getKey();
+				for (final T t : e.getValue()) {
+					mgr.removeVal(t);
+				}
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected JdbcTransactionEvent getTransactionEvent() {
+		IJdbcTransactionEvent event = IJdbcTransactionEvent.ON_AFTER_EXECUTE.get();
+		if (event == null) {
+			IJdbcTransactionEvent.ON_AFTER_EXECUTE.set(event = new JdbcTransactionEvent());
+		}
+		return (JdbcTransactionEvent) event;
 	}
 
 	@SuppressWarnings("unchecked")
