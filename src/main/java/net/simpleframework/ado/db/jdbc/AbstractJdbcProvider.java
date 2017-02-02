@@ -27,10 +27,10 @@ import net.simpleframework.common.object.ObjectEx;
  */
 public abstract class AbstractJdbcProvider extends ObjectEx implements IJdbcProvider {
 
-	private final ThreadLocal<Connection> CONNECTIONS = new ThreadLocal<Connection>();
+	protected final ThreadLocal<Connection> CONNECTIONS = new ThreadLocal<Connection>();
 
 	/* 标识当前连接在嵌套 */
-	private final ThreadLocal<Integer> NESTED = new ThreadLocal<Integer>();
+	protected final ThreadLocal<Integer> NESTED = new ThreadLocal<Integer>();
 
 	private final DataSource dataSource;
 

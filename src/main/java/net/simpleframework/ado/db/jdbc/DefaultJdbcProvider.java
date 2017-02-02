@@ -147,14 +147,11 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 		}
 	}
 
+	protected final ThreadLocal<Boolean> IN_TRANSACTION = new ThreadLocal<Boolean>();
+
 	@Override
-	public boolean isAutoCommit() {
-		try {
-			return getConnection().getAutoCommit();
-		} catch (final SQLException e) {
-			getLog().error(e);
-		}
-		return true;
+	public boolean inTrans() {
+		return IN_TRANSACTION.get() != null;
 	}
 
 	@Override
@@ -163,6 +160,7 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 		Connection connection = null;
 		try {
 			// synchronized (this) {
+			IN_TRANSACTION.set(Boolean.TRUE);
 			connection = beginTran();
 			final T t = callback.onTransactionCallback();
 
@@ -188,6 +186,7 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 			if (event != null) {
 				event.onFinally(connection);
 			}
+			IN_TRANSACTION.remove();
 			IJdbcTransactionEvent.ON_AFTER_EXECUTE.remove();
 		}
 	}

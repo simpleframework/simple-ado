@@ -102,7 +102,7 @@ public interface IJdbcProvider {
 	 */
 	<T> T doExecuteTransaction(ITransactionCallback<T> callback);
 
-	boolean isAutoCommit();
+	boolean inTrans();
 
 	void closeAll(Connection connection, Statement stat, ResultSet rs);
 }

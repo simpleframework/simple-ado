@@ -119,10 +119,10 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 			return super.delete(l, paramsValue);
 		} finally {
 			for (final T t : keys) {
-				if (getJdbcProvider().isAutoCommit()) {
-					removeVal(t);
-				} else {
+				if (getJdbcProvider().inTrans()) {
 					getTransactionEvent().addRobject(this, t);
+				} else {
+					removeVal(t);
 				}
 			}
 		}
@@ -135,10 +135,10 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 		} finally {
 			// 同一个bean，由于条件不同，可能有多个key，当更新时，直接从缓存删掉(更好办法？)
 			for (final T t : objects) {
-				if (getJdbcProvider().isAutoCommit()) {
-					removeVal(t);
-				} else {
+				if (getJdbcProvider().inTrans()) {
 					getTransactionEvent().addRobject(this, t);
+				} else {
+					removeVal(t);
 				}
 			}
 		}
