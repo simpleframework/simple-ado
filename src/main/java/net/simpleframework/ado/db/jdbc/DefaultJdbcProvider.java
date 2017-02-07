@@ -113,7 +113,7 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 			ps = getStatementCreator().prepareStatement(connection = getConnection(), sqlVal);
 			return extractor.extractData(rs = ps.executeQuery());
 		} catch (final Exception ex) {
-			oprintln("Error SQL: " + sqlVal.getOsql());
+			getLog().error("Error SQL: " + sqlVal.getOsql());
 			throw ADOException.of(ex);
 		} finally {
 			closeAll(connection, ps, rs);
