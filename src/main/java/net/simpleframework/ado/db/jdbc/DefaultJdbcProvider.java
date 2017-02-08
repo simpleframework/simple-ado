@@ -179,6 +179,8 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 			rollback(connection);
 			if (event != null) {
 				event.onThrowable(connection);
+			} else {
+				event = IJdbcTransactionEvent.ON_AFTER_EXECUTE.get();
 			}
 			throw ADOException.of(th);
 		} finally {
