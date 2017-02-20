@@ -308,6 +308,6 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 	}
 
 	protected String trimContent(final String contentHtml) {
-		return trimContent(contentHtml, 250);
+		return trimContent(contentHtml, 500);
 	}
 }
