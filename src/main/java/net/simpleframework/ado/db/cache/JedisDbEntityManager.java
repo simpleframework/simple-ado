@@ -81,6 +81,9 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			final String id = getId(val);
 			if (id != null) {
 				idCache.put(key, id);
+				// 插入key值缓存
+				putKeys(id, key);
+
 				if (expire > 0) {
 					jedis.setex(id.getBytes(), expire, serialize(val));
 				} else {
@@ -131,6 +134,9 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 					jedis.close();
 				}
 			}
+
+			// 删除id缓存
+			removeKeys(id);
 		}
 	}
 

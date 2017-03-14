@@ -1,9 +1,7 @@
 package net.simpleframework.ado.db.cache;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.simpleframework.ado.db.DbEntityTable;
@@ -30,8 +28,6 @@ public class MapDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 		super(null);
 	}
 
-	// 反向map，保存keys
-	private final Map<String, Set<String>> kCache = new ConcurrentHashMap<String, Set<String>>();
 	private Map<String, Object> vCache;
 
 	@Override
@@ -57,11 +53,7 @@ public class MapDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			// 插入id缓存
 			idCache.put(key, id);
 			// 插入key值缓存
-			Set<String> keys = kCache.get(id);
-			if (keys == null) {
-				kCache.put(id, keys = new HashSet<String>());
-			}
-			keys.add(key);
+			putKeys(id, key);
 			// 插入值缓存
 			vCache.put(id, val);
 		}
@@ -74,12 +66,7 @@ public class MapDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			// 删除值缓存
 			vCache.remove(id);
 			// 删除id缓存
-			final Set<String> keys = kCache.remove(id);
-			if (keys != null) {
-				for (final String key : keys) {
-					idCache.remove(key);
-				}
-			}
+			removeKeys(id);
 		}
 	}
 

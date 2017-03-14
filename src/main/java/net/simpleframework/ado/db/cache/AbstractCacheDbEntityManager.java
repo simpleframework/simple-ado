@@ -5,8 +5,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.simpleframework.ado.IParamsValue;
@@ -308,5 +310,26 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 			reset();
 		}
 		return ret;
+	}
+
+	// 反向map，保存keys
+	protected final Map<String, Set<String>> kCache = new ConcurrentHashMap<String, Set<String>>();
+
+	protected void removeKeys(final String id) {
+		// 删除id缓存
+		final Set<String> keys = kCache.remove(id);
+		if (keys != null) {
+			for (final String key : keys) {
+				idCache.remove(key);
+			}
+		}
+	}
+
+	protected void putKeys(final String id, final String key) {
+		Set<String> keys = kCache.get(id);
+		if (keys == null) {
+			kCache.put(id, keys = new HashSet<String>());
+		}
+		keys.add(key);
 	}
 }
