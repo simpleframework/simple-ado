@@ -139,9 +139,8 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 			for (final T t : objects) {
 				if (getJdbcProvider().inTrans()) {
 					getTransactionEvent().addRobject(this, t);
-				} else {
-					removeVal(t);
 				}
+				removeVal(t);
 			}
 		}
 	}
