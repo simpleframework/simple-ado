@@ -124,7 +124,7 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 			for (final T t : keys) {
 				if (getJdbcProvider().inTrans()) {
 					final JdbcTransactionEvent jEvent = JdbcUtils
-							.getTransactionEvent(new JdbcTransactionEvent());
+							.addTransactionEvent(new JdbcTransactionEvent());
 					jEvent.addRobject(this, t);
 				}
 				removeVal(t);
@@ -141,7 +141,7 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 			for (final T t : objects) {
 				if (getJdbcProvider().inTrans()) {
 					final JdbcTransactionEvent jEvent = JdbcUtils
-							.getTransactionEvent(new JdbcTransactionEvent());
+							.addTransactionEvent(new JdbcTransactionEvent());
 					jEvent.addRobject(this, t);
 				}
 				removeVal(t);

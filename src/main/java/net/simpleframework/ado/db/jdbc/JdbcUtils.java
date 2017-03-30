@@ -143,7 +143,7 @@ public abstract class JdbcUtils {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T extends IJdbcTransactionEvent> T getTransactionEvent(final T event) {
+	public static <T extends IJdbcTransactionEvent> T addTransactionEvent(final T event) {
 		Map<Class<?>, IJdbcTransactionEvent> events = ON_AFTER_EXECUTE.get();
 		if (events == null) {
 			ON_AFTER_EXECUTE.set(events = new LinkedHashMap<Class<?>, IJdbcTransactionEvent>());
