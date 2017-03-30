@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -156,7 +157,7 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 
 	@Override
 	public <T> T doExecuteTransaction(final ITransactionCallback<T> callback) {
-		IJdbcTransactionEvent event = null;
+		List<IJdbcTransactionEvent> events = null;
 		Connection connection = null;
 		try {
 			// synchronized (this) {
@@ -165,7 +166,7 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 			final T t = callback.onTransactionCallback();
 
 			// 执行后缺省事件
-			event = IJdbcTransactionEvent.ON_AFTER_EXECUTE.get();
+			events = JdbcUtils.getTransactionEvents();
 
 			// 当返回值含有"_throwable"属性，则回滚，可能被调用者try-catch掉
 			if (t instanceof ObjectEx && ((ObjectEx) t).getAttr("_throwable") instanceof Throwable) {
@@ -177,19 +178,23 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 			// }
 		} catch (final Throwable th) {
 			rollback(connection);
-			if (event != null) {
-				event.onThrowable(connection);
+			if (events != null) {
+				for (final IJdbcTransactionEvent event : events) {
+					event.onThrowable(connection);
+				}
 			} else {
-				event = IJdbcTransactionEvent.ON_AFTER_EXECUTE.get();
+				events = JdbcUtils.getTransactionEvents();
 			}
 			throw ADOException.of(th);
 		} finally {
 			endTran(connection);
-			if (event != null) {
-				event.onFinally(connection);
+			if (events != null) {
+				for (final IJdbcTransactionEvent event : events) {
+					event.onFinally(connection);
+				}
 			}
 			IN_TRANSACTION.remove();
-			IJdbcTransactionEvent.ON_AFTER_EXECUTE.remove();
+			JdbcUtils.removeTransactionEvents();
 		}
 	}
 

@@ -24,6 +24,7 @@ import net.simpleframework.ado.db.event.IDbEntityListener;
 import net.simpleframework.ado.db.event.IDbListener;
 import net.simpleframework.ado.db.jdbc.IJdbcProvider;
 import net.simpleframework.ado.db.jdbc.IJdbcTransactionEvent;
+import net.simpleframework.ado.db.jdbc.JdbcUtils;
 import net.simpleframework.ado.query.DataQueryUtils;
 import net.simpleframework.common.BeanUtils;
 import net.simpleframework.common.Convert;
@@ -122,10 +123,11 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 		} finally {
 			for (final T t : keys) {
 				if (getJdbcProvider().inTrans()) {
-					getTransactionEvent().addRobject(this, t);
-				} else {
-					removeVal(t);
+					final JdbcTransactionEvent jEvent = JdbcUtils
+							.getTransactionEvent(new JdbcTransactionEvent());
+					jEvent.addRobject(this, t);
 				}
+				removeVal(t);
 			}
 		}
 	}
@@ -138,7 +140,9 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 			// 同一个bean，由于条件不同，可能有多个key，当更新时，直接从缓存删掉(更好办法？)
 			for (final T t : objects) {
 				if (getJdbcProvider().inTrans()) {
-					getTransactionEvent().addRobject(this, t);
+					final JdbcTransactionEvent jEvent = JdbcUtils
+							.getTransactionEvent(new JdbcTransactionEvent());
+					jEvent.addRobject(this, t);
 				}
 				removeVal(t);
 			}
@@ -170,15 +174,6 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 				}
 			}
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	protected JdbcTransactionEvent getTransactionEvent() {
-		IJdbcTransactionEvent event = IJdbcTransactionEvent.ON_AFTER_EXECUTE.get();
-		if (event == null) {
-			IJdbcTransactionEvent.ON_AFTER_EXECUTE.set(event = new JdbcTransactionEvent());
-		}
-		return (JdbcTransactionEvent) event;
 	}
 
 	@SuppressWarnings("unchecked")

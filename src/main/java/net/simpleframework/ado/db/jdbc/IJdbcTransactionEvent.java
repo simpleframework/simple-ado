@@ -11,7 +11,8 @@ import java.sql.Connection;
  */
 public interface IJdbcTransactionEvent {
 
-	static final ThreadLocal<IJdbcTransactionEvent> ON_AFTER_EXECUTE = new ThreadLocal<IJdbcTransactionEvent>();
+	// static final ThreadLocal<IJdbcTransactionEvent> ON_AFTER_EXECUTE = new
+	// ThreadLocal<IJdbcTransactionEvent>();
 
 	/**
 	 * 异常执行操作中触发

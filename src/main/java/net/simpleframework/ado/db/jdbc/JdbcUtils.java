@@ -5,6 +5,9 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -120,5 +123,36 @@ public abstract class JdbcUtils {
 				log.warn(e);
 			}
 		}
+	}
+
+	static final ThreadLocal<Map<Class<?>, IJdbcTransactionEvent>> ON_AFTER_EXECUTE;
+	static {
+		ON_AFTER_EXECUTE = new ThreadLocal<Map<Class<?>, IJdbcTransactionEvent>>();
+	}
+
+	public static List<IJdbcTransactionEvent> getTransactionEvents() {
+		final Map<Class<?>, IJdbcTransactionEvent> events = ON_AFTER_EXECUTE.get();
+		if (events != null) {
+			return new ArrayList<IJdbcTransactionEvent>(events.values());
+		}
+		return null;
+	}
+
+	public static void removeTransactionEvents() {
+		ON_AFTER_EXECUTE.remove();
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T extends IJdbcTransactionEvent> T getTransactionEvent(final T event) {
+		Map<Class<?>, IJdbcTransactionEvent> events = ON_AFTER_EXECUTE.get();
+		if (events == null) {
+			ON_AFTER_EXECUTE.set(events = new LinkedHashMap<Class<?>, IJdbcTransactionEvent>());
+		}
+		final Class<?> eClass = event.getClass();
+		IJdbcTransactionEvent t = events.get(eClass);
+		if (t == null) {
+			events.put(eClass, t = event);
+		}
+		return (T) t;
 	}
 }
