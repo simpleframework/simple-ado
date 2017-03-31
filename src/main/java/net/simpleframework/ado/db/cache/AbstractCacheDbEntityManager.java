@@ -23,7 +23,7 @@ import net.simpleframework.ado.db.common.SQLValue;
 import net.simpleframework.ado.db.event.IDbEntityListener;
 import net.simpleframework.ado.db.event.IDbListener;
 import net.simpleframework.ado.db.jdbc.IJdbcProvider;
-import net.simpleframework.ado.db.jdbc.IJdbcTransactionEvent;
+import net.simpleframework.ado.db.jdbc.IJdbcTransactionEvent.JdbcTransactionEvent;
 import net.simpleframework.ado.db.jdbc.JdbcUtils;
 import net.simpleframework.ado.query.DataQueryUtils;
 import net.simpleframework.common.BeanUtils;
@@ -123,8 +123,8 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 		} finally {
 			for (final T t : keys) {
 				if (getJdbcProvider().inTrans()) {
-					final JdbcTransactionEvent jEvent = JdbcUtils
-							.addTransactionEvent(new JdbcTransactionEvent());
+					final CacheTransactionEvent jEvent = JdbcUtils
+							.addTransactionEvent(new CacheTransactionEvent());
 					jEvent.addRobject(this, t);
 				}
 				removeVal(t);
@@ -140,8 +140,8 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 			// 同一个bean，由于条件不同，可能有多个key，当更新时，直接从缓存删掉(更好办法？)
 			for (final T t : objects) {
 				if (getJdbcProvider().inTrans()) {
-					final JdbcTransactionEvent jEvent = JdbcUtils
-							.addTransactionEvent(new JdbcTransactionEvent());
+					final CacheTransactionEvent jEvent = JdbcUtils
+							.addTransactionEvent(new CacheTransactionEvent());
 					jEvent.addRobject(this, t);
 				}
 				removeVal(t);
@@ -149,7 +149,7 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 		}
 	}
 
-	protected class JdbcTransactionEvent implements IJdbcTransactionEvent {
+	protected class CacheTransactionEvent extends JdbcTransactionEvent {
 
 		private final Map<AbstractCacheDbEntityManager<T>, List<T>> removes = new HashMap<AbstractCacheDbEntityManager<T>, List<T>>();
 
@@ -159,10 +159,6 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 				removes.put(mgr, list = new ArrayList<T>());
 			}
 			list.add(t);
-		}
-
-		@Override
-		public void onThrowable(final Connection connection) {
 		}
 
 		@Override

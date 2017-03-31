@@ -39,6 +39,7 @@ public abstract class AbstractDbManager extends AbstractADOManager implements ID
 		return this;
 	}
 
+	@Override
 	public IJdbcProvider getJdbcProvider() {
 		return dbFactory.jdbcProvider;
 	}

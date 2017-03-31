@@ -8,6 +8,7 @@ import net.simpleframework.ado.db.event.IDbListener;
 import net.simpleframework.ado.db.jdbc.DatabaseMeta;
 import net.simpleframework.ado.db.jdbc.IBatchValueSetter;
 import net.simpleframework.ado.db.jdbc.IConnectionCallback;
+import net.simpleframework.ado.db.jdbc.IJdbcProvider;
 import net.simpleframework.ado.db.jdbc.IQueryExtractor;
 import net.simpleframework.ado.trans.ITransactionManager;
 
@@ -26,6 +27,8 @@ public interface IDbManager extends IADOManager, ITransactionManager {
 	 * @return
 	 */
 	DatabaseMeta getDatabaseMeta();
+
+	IJdbcProvider getJdbcProvider();
 
 	/* query */
 	<T> T executeQuery(SQLValue value, IQueryExtractor<T> extractor);

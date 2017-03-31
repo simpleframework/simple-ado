@@ -173,6 +173,11 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 				rollback(connection);
 			} else {
 				commitTran(connection);
+				if (events != null) {
+					for (final IJdbcTransactionEvent event : events) {
+						event.onSuccess(connection);
+					}
+				}
 			}
 			return t;
 			// }
