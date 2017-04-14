@@ -76,4 +76,6 @@ public interface ILuceneManager extends IADOManager {
 	 * @return
 	 */
 	String[] getQueryTokens(String queryString);
+
+	void optimize();
 }

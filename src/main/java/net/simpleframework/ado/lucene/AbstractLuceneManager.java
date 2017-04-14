@@ -301,6 +301,19 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 		}
 	}
 
+	@Override
+	public void optimize() {
+		IndexWriter iWriter = null;
+		try {
+			iWriter = createIndexWriter();
+			iWriter.forceMerge(1);
+		} catch (final IOException e) {
+			throw ADOException.of(e);
+		} finally {
+			closeWriter(iWriter);
+		}
+	}
+
 	/*---------------------------------utils----------------------------------*/
 
 	protected String trimContent(final String contentHtml, final int length) {
