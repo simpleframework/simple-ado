@@ -8,10 +8,13 @@ import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 
+import net.simpleframework.common.StringUtils;
+
 /**
  * Licensed under the Apache License, Version 2.0
  * 
- * @author 陈侃(cknet@126.com, 13910090885) https://github.com/simpleframework
+ * @author 陈侃(cknet@126.com, 13910090885)
+ *         https://github.com/simpleframework
  *         http://www.simpleframework.net
  */
 public class LuceneDocument {
@@ -46,14 +49,14 @@ public class LuceneDocument {
 	}
 
 	public void addStringField(final String name, final String value, final boolean stored) {
-		if (value == null) {
+		if (!StringUtils.hasText(value)) {
 			return;
 		}
 		doc.add(new StringField(name, value, stored ? Store.YES : Store.NO));
 	}
 
 	public void addTextField(final String name, final String value, final boolean stored) {
-		if (value == null) {
+		if (!StringUtils.hasText(value)) {
 			return;
 		}
 		doc.add(new TextField(name, value, stored ? Store.YES : Store.NO));
