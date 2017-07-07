@@ -3,6 +3,7 @@ package net.simpleframework.ado.lucene;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -21,7 +22,6 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.SimpleFSLockFactory;
-import org.apache.lucene.util.Version;
 
 import net.simpleframework.ado.ADOException;
 import net.simpleframework.ado.AbstractADOManager;
@@ -43,7 +43,7 @@ import net.simpleframework.common.web.html.HtmlUtils;
  *         http://www.simpleframework.net
  */
 public abstract class AbstractLuceneManager extends AbstractADOManager implements ILuceneManager {
-	final Version version = Version.LUCENE_4_9;
+	// final Version version = Version.LUCENE_4_9;
 
 	protected FSDirectory directory;
 
@@ -51,17 +51,17 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 
 	public AbstractLuceneManager(final File indexPath) {
 		try {
-			this.directory = createFSDirectory(indexPath);
+			this.directory = createFSDirectory(indexPath.toPath());
 		} catch (final IOException e) {
 			throw ADOException.of(e);
 		}
 	}
 
-	protected FSDirectory createFSDirectory(final File indexPath) throws IOException {
-		return FSDirectory.open(indexPath, new SimpleFSLockFactory());
+	protected FSDirectory createFSDirectory(final Path indexPath) throws IOException {
+		return FSDirectory.open(indexPath, SimpleFSLockFactory.INSTANCE);
 	}
 
-	public File getIndexPath() {
+	public Path getIndexPath() {
 		return directory.getDirectory();
 	}
 
@@ -76,13 +76,13 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 
 	protected Analyzer getDefaultAnalyzer() {
 		if (defaultAnalyzer == null) {
-			defaultAnalyzer = new SmartChineseAnalyzer(version);
+			defaultAnalyzer = new SmartChineseAnalyzer();
 		}
 		return defaultAnalyzer;
 	}
 
 	protected IndexWriter createIndexWriter() throws IOException {
-		final IndexWriterConfig iwConfig = new IndexWriterConfig(version, getDefaultAnalyzer());
+		final IndexWriterConfig iwConfig = new IndexWriterConfig(getDefaultAnalyzer());
 		iwConfig.setOpenMode(OpenMode.CREATE_OR_APPEND);
 		return new IndexWriter(directory, iwConfig);
 	}
@@ -237,9 +237,9 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 		Query query = null;
 		QueryParser qp;
 		if (StringUtils.hasText(queryString) && indexExists()
-				&& (qp = new MultiFieldQueryParser(version, queryFields,
-						getDefaultAnalyzer())) != null) {
+				&& (qp = new MultiFieldQueryParser(queryFields, getDefaultAnalyzer())) != null) {
 			try {
+				qp.setAutoGeneratePhraseQueries(true);
 				query = qp.parse(queryString.trim());
 			} catch (final ParseException e) {
 				getLog().warn(e);

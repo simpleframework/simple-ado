@@ -83,7 +83,7 @@ public abstract class LuceneQuery<T> extends AbstractDataQuery<T> {
 
 	protected TopScoreDocCollector search(final IndexSearcher searcher, final int topNum)
 			throws IOException {
-		final TopScoreDocCollector collector = TopScoreDocCollector.create(topNum, false);
+		final TopScoreDocCollector collector = TopScoreDocCollector.create(topNum);
 		searcher.search(query, collector);
 		return collector;
 	}
