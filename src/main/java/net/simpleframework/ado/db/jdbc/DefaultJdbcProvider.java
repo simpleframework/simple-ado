@@ -68,8 +68,7 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 	}
 
 	@Override
-	public int[] doBatch(final CharSequence sql, final int batchCount,
-			final IBatchValueSetter setter) {
+	public int[] doBatch(final CharSequence sql, final int batchCount, final IBatchValueSetter setter) {
 		Connection connection = null;
 		PreparedStatement ps = null;
 		try {
@@ -172,12 +171,12 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 			if (t instanceof ObjectEx && ((ObjectEx) t).getAttr("_throwable") instanceof Throwable) {
 				rollback(connection);
 			} else {
-				commitTran(connection);
 				if (events != null) {
 					for (final IJdbcTransactionEvent event : events) {
 						event.onSuccess(connection);
 					}
 				}
+				commitTran(connection);
 			}
 			return t;
 			// }
