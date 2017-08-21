@@ -149,10 +149,6 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 		return val.getClass().getSimpleName() + ":" + id;
 	}
 
-	@Override
-	public void setMaxCacheSize(final int maxCacheSize) {
-	}
-
 	private byte[] serialize(final Object obj) throws IOException {
 		return IoUtils_hessian.serialize(obj);
 		// return IoUtils_kryo.serialize(obj, getBeanClass());

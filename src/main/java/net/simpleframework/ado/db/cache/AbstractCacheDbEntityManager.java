@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +29,7 @@ import net.simpleframework.ado.db.jdbc.JdbcUtils;
 import net.simpleframework.ado.query.DataQueryUtils;
 import net.simpleframework.common.BeanUtils;
 import net.simpleframework.common.Convert;
+import net.simpleframework.common.coll.LRUMap;
 
 /**
  * Licensed under the Apache License, Version 2.0
@@ -39,10 +41,22 @@ import net.simpleframework.common.Convert;
 public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 		implements IDbEntityCache {
 	/* 缓存key->id */
-	protected Map<String, String> idCache = new ConcurrentHashMap<String, String>();
+	protected Map<String, String> idCache;
+
+	// 反向map，保存keys
+	protected Map<String, Set<String>> kCache;
 
 	public AbstractCacheDbEntityManager(final DbEntityTable entityTable) {
 		super(entityTable);
+		final int maxCacheSize = entityTable != null ? entityTable.getMaxCacheSize()
+				: getMaxCacheSize();
+		if (maxCacheSize > 0) {
+			idCache = Collections.synchronizedMap(new LRUMap<String, String>(maxCacheSize));
+			kCache = Collections.synchronizedMap(new LRUMap<String, Set<String>>(maxCacheSize));
+		} else {
+			idCache = new ConcurrentHashMap<String, String>();
+			kCache = new ConcurrentHashMap<String, Set<String>>();
+		}
 	}
 
 	protected int maxCacheSize;
@@ -52,6 +66,11 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 
 	public int getMaxCacheSize() {
 		return maxCacheSize;
+	}
+
+	@Override
+	public void setMaxCacheSize(final int maxCacheSize) {
+		this.maxCacheSize = maxCacheSize;
 	}
 
 	@Override
@@ -301,9 +320,6 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 		}
 		return ret;
 	}
-
-	// 反向map，保存keys
-	protected final Map<String, Set<String>> kCache = new ConcurrentHashMap<String, Set<String>>();
 
 	protected void removeKeys(final String id) {
 		// 删除id缓存
