@@ -182,7 +182,6 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 			return t;
 			// }
 		} catch (final Throwable th) {
-			rollback(connection);
 			if (events != null) {
 				for (final IJdbcTransactionEvent event : events) {
 					event.onThrowable(connection);
@@ -190,14 +189,15 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 			} else {
 				events = JdbcUtils.getTransactionEvents();
 			}
+			rollback(connection);
 			throw ADOException.of(th);
 		} finally {
-			endTran(connection);
 			if (events != null) {
 				for (final IJdbcTransactionEvent event : events) {
 					event.onFinally(connection);
 				}
 			}
+			endTran(connection);
 			IN_TRANSACTION.remove();
 			JdbcUtils.removeTransactionEvents();
 		}
