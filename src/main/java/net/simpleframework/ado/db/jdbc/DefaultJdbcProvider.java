@@ -68,7 +68,8 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 	}
 
 	@Override
-	public int[] doBatch(final CharSequence sql, final int batchCount, final IBatchValueSetter setter) {
+	public int[] doBatch(final CharSequence sql, final int batchCount,
+			final IBatchValueSetter setter) {
 		Connection connection = null;
 		PreparedStatement ps = null;
 		try {
