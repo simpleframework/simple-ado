@@ -198,7 +198,7 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 			tokenStream = getDefaultAnalyzer().tokenStream("QUERY_TOKENS",
 					new StringReader(queryString));
 			tokenStream.reset();
-			final ArrayList<String> al = new ArrayList<String>();
+			final ArrayList<String> al = new ArrayList<>();
 			while (tokenStream.incrementToken()) {
 				final String term = tokenStream.getAttribute(CharTermAttribute.class).toString();
 				if (term != null && term.length() > 1) {

@@ -34,7 +34,7 @@ public class DbManagerFactory extends ObjectEx implements IADOManagerFactory {
 
 	protected Map<Class<?>, IDbEntityManager<?>> eManagerCache;
 	{
-		eManagerCache = new ConcurrentHashMap<Class<?>, IDbEntityManager<?>>();
+		eManagerCache = new ConcurrentHashMap<>();
 	}
 
 	public IDbEntityManager<?> createEntityManager(final Class<?> beanClass) {

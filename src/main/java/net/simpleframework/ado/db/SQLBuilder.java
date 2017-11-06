@@ -145,7 +145,7 @@ public abstract class SQLBuilder {
 	public static SQLValue getInsertSQLValue(final DbEntityTable dbTable, final Object object) {
 		final StringBuilder sb = new StringBuilder();
 		sb.append("insert into ").append(dbTable.getName()).append("(");
-		final List<Object> vl = new ArrayList<Object>();
+		final List<Object> vl = new ArrayList<>();
 		int size = 0;
 		for (final DbTableColumn tCol : dbTable.getTableColumns().values()) {
 			if (size > 0) {
@@ -173,7 +173,7 @@ public abstract class SQLBuilder {
 			return null;
 		}
 
-		final List<Object> vl = new ArrayList<Object>();
+		final List<Object> vl = new ArrayList<>();
 		final StringBuilder sb = new StringBuilder();
 		sb.append("update ").append(dbTable.getName()).append(" set ");
 

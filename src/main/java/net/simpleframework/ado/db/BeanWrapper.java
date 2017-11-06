@@ -24,7 +24,7 @@ import net.simpleframework.common.object.ObjectUtils;
  */
 public class BeanWrapper<T> extends ObjectEx {
 
-	private final List<PropertyCache> properties = new ArrayList<PropertyCache>();
+	private final List<PropertyCache> properties = new ArrayList<>();
 
 	private final Class<T> beanClass;
 
@@ -150,7 +150,7 @@ public class BeanWrapper<T> extends ObjectEx {
 		@SuppressWarnings("unchecked")
 		Set<String> set = (Set<String>) bean.getAttr("@getPropertiesExt");
 		if (set == null) {
-			bean.setAttr("@getPropertiesExt", set = new HashSet<String>());
+			bean.setAttr("@getPropertiesExt", set = new HashSet<>());
 		}
 		return set;
 	}

@@ -54,8 +54,8 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 			idCache = Collections.synchronizedMap(new LRUMap<String, String>(maxCacheSize));
 			kCache = Collections.synchronizedMap(new LRUMap<String, Set<String>>(maxCacheSize));
 		} else {
-			idCache = new ConcurrentHashMap<String, String>();
-			kCache = new ConcurrentHashMap<String, Set<String>>();
+			idCache = new ConcurrentHashMap<>();
+			kCache = new ConcurrentHashMap<>();
 		}
 	}
 
@@ -170,12 +170,12 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 
 	protected class CacheTransactionEvent extends JdbcTransactionEvent {
 
-		private final Map<AbstractCacheDbEntityManager<T>, List<T>> removes = new HashMap<AbstractCacheDbEntityManager<T>, List<T>>();
+		private final Map<AbstractCacheDbEntityManager<T>, List<T>> removes = new HashMap<>();
 
 		public void addRobject(final AbstractCacheDbEntityManager<T> mgr, final T t) {
 			List<T> list = removes.get(mgr);
 			if (list == null) {
-				removes.put(mgr, list = new ArrayList<T>());
+				removes.put(mgr, list = new ArrayList<>());
 			}
 			list.add(t);
 		}
@@ -214,7 +214,7 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 		if (getEntityTable().isNoCache()) {
 			return super.queryBeans(columns, paramsValue);
 		} else {
-			final BeanWrapper<T> wrapper = new BeanWrapper<T>(columns, getBeanClass());
+			final BeanWrapper<T> wrapper = new BeanWrapper<>(columns, getBeanClass());
 			final IJdbcProvider jdbcProvider = getJdbcProvider();
 			return new DbDataQuery<T>(dbFactory, this,
 					createSQLValue(null /* columns */, paramsValue)) {
@@ -334,7 +334,7 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 	protected void putKeys(final String id, final String key) {
 		Set<String> keys = kCache.get(id);
 		if (keys == null) {
-			kCache.put(id, keys = new HashSet<String>());
+			kCache.put(id, keys = new HashSet<>());
 		}
 		keys.add(key);
 	}

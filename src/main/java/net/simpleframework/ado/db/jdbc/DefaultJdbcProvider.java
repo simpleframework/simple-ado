@@ -148,7 +148,7 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 		}
 	}
 
-	protected final ThreadLocal<Boolean> IN_TRANSACTION = new ThreadLocal<Boolean>();
+	protected final ThreadLocal<Boolean> IN_TRANSACTION = new ThreadLocal<>();
 
 	@Override
 	public boolean inTrans() {

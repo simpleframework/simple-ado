@@ -154,7 +154,7 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 
 	@SuppressWarnings("unchecked")
 	private Collection<IDbEntityListener<T>> getListener(final IDbEntityListener<T> l) {
-		final ArrayList<IDbEntityListener<T>> listeners = new ArrayList<IDbEntityListener<T>>();
+		final ArrayList<IDbEntityListener<T>> listeners = new ArrayList<>();
 		if (l != null) {
 			listeners.add(l);
 		}

@@ -20,7 +20,7 @@ public abstract class AbstractADOManager extends ObjectEx implements IADOManager
 
 	protected Collection<IADOListener> getListeners() {
 		if (listeners == null) {
-			listeners = new LinkedHashSet<IADOListener>();
+			listeners = new LinkedHashSet<>();
 		}
 		return listeners;
 	}

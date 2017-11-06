@@ -40,5 +40,5 @@ public interface IDbEntityCache {
 	 */
 	void setMaxCacheSize(int maxCacheSize);
 
-	static ThreadLocal<KVMap> REQUEST_THREAD_CACHE = new ThreadLocal<KVMap>();
+	static ThreadLocal<KVMap> REQUEST_THREAD_CACHE = new ThreadLocal<>();
 }

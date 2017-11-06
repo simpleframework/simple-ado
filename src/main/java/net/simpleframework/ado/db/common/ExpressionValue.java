@@ -70,7 +70,7 @@ public class ExpressionValue extends AbstractParamsValue<ExpressionValue> {
 				return null;
 			}
 			sql = new StringBuilder();
-			al = new ArrayList<Object>();
+			al = new ArrayList<>();
 			final String column = item.getColumn();
 			if (tp == ETimePeriod.custom) {
 				final Date from = timePeriod.getFrom();
@@ -96,7 +96,7 @@ public class ExpressionValue extends AbstractParamsValue<ExpressionValue> {
 			}
 		} else {
 			sql = new StringBuilder();
-			al = new ArrayList<Object>();
+			al = new ArrayList<>();
 			if (item.isLbracket()) {
 				sql.append("(");
 			}

@@ -30,7 +30,7 @@ public interface IJdbcTransactionEvent {
 	void onFinally(Connection connection);
 
 	public static class JdbcTransactionEvent implements IJdbcTransactionEvent {
-		protected final List<Object> objects = new ArrayList<Object>();
+		protected final List<Object> objects = new ArrayList<>();
 
 		public void addQueue(final Object object) {
 			objects.add(object);

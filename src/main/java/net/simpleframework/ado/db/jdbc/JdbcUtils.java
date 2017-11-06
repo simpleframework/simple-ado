@@ -27,7 +27,7 @@ import net.simpleframework.common.logger.LogFactory;
 public abstract class JdbcUtils {
 	static Log log = LogFactory.getLogger(JdbcUtils.class);
 
-	private static Map<DataSource, DatabaseMeta> databaseMetaDataMap = new ConcurrentHashMap<DataSource, DatabaseMeta>();
+	private static Map<DataSource, DatabaseMeta> databaseMetaDataMap = new ConcurrentHashMap<>();
 
 	public static DatabaseMeta getDatabaseMetaData(final DataSource dataSource) {
 		DatabaseMeta _metaData = databaseMetaDataMap.get(dataSource);
@@ -127,13 +127,13 @@ public abstract class JdbcUtils {
 
 	static final ThreadLocal<Map<Class<?>, IJdbcTransactionEvent>> ON_AFTER_EXECUTE;
 	static {
-		ON_AFTER_EXECUTE = new ThreadLocal<Map<Class<?>, IJdbcTransactionEvent>>();
+		ON_AFTER_EXECUTE = new ThreadLocal<>();
 	}
 
 	public static List<IJdbcTransactionEvent> getTransactionEvents() {
 		final Map<Class<?>, IJdbcTransactionEvent> events = ON_AFTER_EXECUTE.get();
 		if (events != null) {
-			return new ArrayList<IJdbcTransactionEvent>(events.values());
+			return new ArrayList<>(events.values());
 		}
 		return null;
 	}
@@ -146,7 +146,7 @@ public abstract class JdbcUtils {
 	public static <T extends IJdbcTransactionEvent> T addTransactionEvent(final T event) {
 		Map<Class<?>, IJdbcTransactionEvent> events = ON_AFTER_EXECUTE.get();
 		if (events == null) {
-			ON_AFTER_EXECUTE.set(events = new LinkedHashMap<Class<?>, IJdbcTransactionEvent>());
+			ON_AFTER_EXECUTE.set(events = new LinkedHashMap<>());
 		}
 		final Class<?> eClass = event.getClass();
 		IJdbcTransactionEvent t = events.get(eClass);

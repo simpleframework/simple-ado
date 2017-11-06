@@ -51,7 +51,7 @@ public class DbTableColumn extends ColumnData {
 
 	private final static Map<Class<?>, Map<String, DbTableColumn>> columnsCache;
 	static {
-		columnsCache = new ConcurrentHashMap<Class<?>, Map<String, DbTableColumn>>();
+		columnsCache = new ConcurrentHashMap<>();
 	}
 
 	public static Map<String, DbTableColumn> getTableColumns(final Class<?> beanClass) {
@@ -59,7 +59,7 @@ public class DbTableColumn extends ColumnData {
 		if (data != null) {
 			return data;
 		}
-		data = new HashMap<String, DbTableColumn>();
+		data = new HashMap<>();
 		for (final PropertyWrapper pw : BeanUtils.getProperties(beanClass).values()) {
 			ColumnMeta meta = null;
 			if (pw.field != null) {

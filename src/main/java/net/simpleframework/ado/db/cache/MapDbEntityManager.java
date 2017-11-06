@@ -36,7 +36,7 @@ public class MapDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 		if (maxCacheSize > 0) {
 			vCache = Collections.synchronizedMap(new LRUMap<String, Object>(maxCacheSize));
 		} else {
-			vCache = new ConcurrentHashMap<String, Object>();
+			vCache = new ConcurrentHashMap<>();
 		}
 	}
 

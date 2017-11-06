@@ -169,7 +169,7 @@ public abstract class AbstractDbManager extends AbstractADOManager implements ID
 
 	protected <T> T createQueryObject(final String[] columns, final SQLValue sqlVal,
 			final Class<T> beanClass) {
-		final BeanWrapper<T> wrapper = new BeanWrapper<T>(columns, beanClass);
+		final BeanWrapper<T> wrapper = new BeanWrapper<>(columns, beanClass);
 		return executeQuery(sqlVal, new IQueryExtractor<T>() {
 
 			@Override
@@ -204,7 +204,7 @@ public abstract class AbstractDbManager extends AbstractADOManager implements ID
 
 	protected <T> DbDataQuery<T> createQueryEntitySet(final String[] columns, final SQLValue sqlVal,
 			final Class<T> beanClass) {
-		final BeanWrapper<T> wrapper = new BeanWrapper<T>(columns, beanClass);
+		final BeanWrapper<T> wrapper = new BeanWrapper<>(columns, beanClass);
 		return new DbDataQuery<T>(dbFactory, this, sqlVal) {
 
 			@Override

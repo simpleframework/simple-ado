@@ -161,7 +161,7 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 				final String lsql = getJdbcProvider().getJdbcDialect().toLimitSQL(sql, i, fetchSize);
 				final boolean absolute = lsql.equals(sql);
 
-				final ArrayList<T> rVal = new ArrayList<T>();
+				final ArrayList<T> rVal = new ArrayList<>();
 				getJdbcProvider().doQuery(new SQLValue(lsql, sqlVal.getValues()).setOsql(sql),
 						new IQueryCallback() {
 							@Override
