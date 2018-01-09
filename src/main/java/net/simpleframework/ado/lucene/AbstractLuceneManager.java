@@ -233,7 +233,8 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 		return obj;
 	}
 
-	protected Query getQuery(final String[] queryFields, final String queryString) {
+	protected Query getQuery(final String domain, final String[] queryFields,
+			final String queryString) {
 		Query query = null;
 		QueryParser qp;
 		if (StringUtils.hasText(queryString) && indexExists()
@@ -249,9 +250,9 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 	}
 
 	@Override
-	public <T> IDataQuery<T> query(final String[] queryFields, final String queryString,
-			final Class<T> beanClass) {
-		final Query query = getQuery(queryFields, queryString);
+	public <T> IDataQuery<T> query(final String domain, final String[] queryFields,
+			final String queryString, final Class<T> beanClass) {
+		final Query query = getQuery(domain, queryFields, queryString);
 		if (query == null) {
 			return DataQueryUtils.nullQuery();
 		}
@@ -265,14 +266,15 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 	}
 
 	@Override
-	public <T> IDataQuery<T> query(final String queryString, final Class<T> beanClass) {
-		return query(getQueryFields(), queryString, beanClass);
+	public <T> IDataQuery<T> query(final String domain, final String queryString,
+			final Class<T> beanClass) {
+		return query(domain, getQueryFields(), queryString, beanClass);
 	}
 
 	@Override
-	public IDataQuery<Map<String, Object>> query(final String[] queryFields,
+	public IDataQuery<Map<String, Object>> query(final String domain, final String[] queryFields,
 			final String queryString) {
-		final Query query = getQuery(queryFields, queryString);
+		final Query query = getQuery(domain, queryFields, queryString);
 		if (query == null) {
 			return DataQueryUtils.nullQuery();
 		}
@@ -286,8 +288,8 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 	}
 
 	@Override
-	public IDataQuery<Map<String, Object>> query(final String queryString) {
-		return query(getQueryFields(), queryString);
+	public IDataQuery<Map<String, Object>> query(final String domain, final String queryString) {
+		return query(domain, getQueryFields(), queryString);
 	}
 
 	protected abstract String[] getQueryFields();
