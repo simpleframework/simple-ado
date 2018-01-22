@@ -240,7 +240,7 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 		if (StringUtils.hasText(queryString) && indexExists()
 				&& (qp = new MultiFieldQueryParser(queryFields, getDefaultAnalyzer())) != null) {
 			try {
-				qp.setSplitOnWhitespace(true);
+				// qp.setSplitOnWhitespace(true);
 				qp.setAutoGeneratePhraseQueries(true);
 				query = qp.parse(queryString.trim());
 			} catch (final ParseException e) {
