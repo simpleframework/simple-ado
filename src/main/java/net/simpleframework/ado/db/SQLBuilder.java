@@ -178,7 +178,8 @@ public abstract class SQLBuilder {
 		sb.append("update ").append(dbTable.getName()).append(" set ");
 
 		final Collection<?> coll = (columns != null && columns.length > 0)
-				? ArrayUtils.asList(columns) : dbTable.getTableColumns().values();
+				? ArrayUtils.asList(columns)
+				: dbTable.getTableColumns().values();
 
 		int i = 0;
 		for (final Object oCol : coll) {
