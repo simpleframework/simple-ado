@@ -21,6 +21,8 @@ public interface IDbQueryManager extends IDbManager {
 
 	int queryForInt(SQLValue sqlVal);
 
+	float queryForFloat(SQLValue sqlVal);
+
 	boolean queryForBool(SQLValue sqlVal);
 
 	/**

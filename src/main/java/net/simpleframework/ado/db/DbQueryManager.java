@@ -59,6 +59,16 @@ public class DbQueryManager extends AbstractDbManager implements IDbQueryManager
 	}
 
 	@Override
+	public float queryForFloat(final SQLValue sqlVal) {
+		return executeQuery(sqlVal, new IQueryExtractor<Float>() {
+			@Override
+			public Float extractData(final ResultSet rs) throws SQLException, ADOException {
+				return rs.next() ? rs.getFloat(1) : 0f;
+			}
+		});
+	}
+
+	@Override
 	public boolean queryForBool(final SQLValue sqlVal) {
 		return executeQuery(sqlVal, new IQueryExtractor<Boolean>() {
 			@Override
