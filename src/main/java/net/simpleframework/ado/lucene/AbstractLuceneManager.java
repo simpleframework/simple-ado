@@ -21,7 +21,6 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.SimpleFSLockFactory;
 
 import net.simpleframework.ado.ADOException;
 import net.simpleframework.ado.AbstractADOManager;
@@ -58,7 +57,9 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 	}
 
 	protected FSDirectory createFSDirectory(final Path indexPath) throws IOException {
-		return FSDirectory.open(indexPath, SimpleFSLockFactory.INSTANCE);
+		// return FSDirectory.open(indexPath, SimpleFSLockFactory.INSTANCE);
+		System.out.println("FSDirectory.open");
+		return FSDirectory.open(indexPath);
 	}
 
 	public Path getIndexPath() {
