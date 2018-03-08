@@ -4,13 +4,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import net.simpleframework.ado.IParamsValue;
 import net.simpleframework.ado.IParamsValue.AbstractParamsValue;
@@ -29,7 +27,6 @@ import net.simpleframework.ado.db.jdbc.JdbcUtils;
 import net.simpleframework.ado.query.DataQueryUtils;
 import net.simpleframework.common.BeanUtils;
 import net.simpleframework.common.Convert;
-import net.simpleframework.common.coll.LRUMap;
 
 /**
  * Licensed under the Apache License, Version 2.0
@@ -40,28 +37,25 @@ import net.simpleframework.common.coll.LRUMap;
  */
 public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 		implements IDbEntityCache {
-	/* 缓存key->id */
-	protected Map<String, String> idCache;
-
-	// 反向map，保存keys
-	protected Map<String, Set<String>> kCache;
-
-	public AbstractCacheDbEntityManager(final DbEntityTable entityTable) {
-		super(entityTable);
-		final int maxCacheSize = entityTable != null ? entityTable.getMaxCacheSize()
-				: getMaxCacheSize();
-		if (maxCacheSize > 0) {
-			idCache = Collections.synchronizedMap(new LRUMap<String, String>(maxCacheSize));
-			kCache = Collections.synchronizedMap(new LRUMap<String, Set<String>>(maxCacheSize));
-		} else {
-			idCache = new ConcurrentHashMap<>();
-			kCache = new ConcurrentHashMap<>();
-		}
-	}
-
 	protected int maxCacheSize;
 	{
 		setMaxCacheSize(2000);
+	}
+
+	/* 缓存key->id */
+	protected Map<String, Object> idCache;
+
+	// 反向map，保存keys
+	protected Map<String, Set<String>> keysCache;
+
+	public AbstractCacheDbEntityManager(final DbEntityTable entityTable) {
+		super(entityTable);
+		if (entityTable != null) {
+			final int maxCacheSize = entityTable.getMaxCacheSize();
+			if (maxCacheSize > 0) {
+				setMaxCacheSize(maxCacheSize);
+			}
+		}
 	}
 
 	public int getMaxCacheSize() {
@@ -323,7 +317,7 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 
 	protected void removeKeys(final String id) {
 		// 删除id缓存
-		final Set<String> keys = kCache.remove(id);
+		final Set<String> keys = keysCache.remove(id);
 		if (keys != null) {
 			for (final String key : keys) {
 				idCache.remove(key);
@@ -332,9 +326,9 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 	}
 
 	protected void putKeys(final String id, final String key) {
-		Set<String> keys = kCache.get(id);
+		Set<String> keys = keysCache.get(id);
 		if (keys == null) {
-			kCache.put(id, keys = new HashSet<>());
+			keysCache.put(id, keys = new HashSet<>());
 		}
 		keys.add(key);
 	}

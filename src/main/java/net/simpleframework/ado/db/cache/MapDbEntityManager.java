@@ -2,6 +2,7 @@ package net.simpleframework.ado.db.cache;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.simpleframework.ado.db.DbEntityTable;
@@ -15,17 +16,21 @@ import net.simpleframework.common.coll.LRUMap;
  *         http://www.simpleframework.net
  */
 public class MapDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
+	public MapDbEntityManager() {
+		this(null);
+	}
 
 	public MapDbEntityManager(final DbEntityTable entityTable) {
 		super(entityTable);
-		final int maxCacheSize = entityTable.getMaxCacheSize();
-		if (maxCacheSize > 0) {
-			setMaxCacheSize(maxCacheSize);
-		}
-	}
 
-	public MapDbEntityManager() {
-		super(null);
+		final int maxCacheSize = getMaxCacheSize();
+		if (maxCacheSize > 0) {
+			idCache = Collections.synchronizedMap(new LRUMap<String, Object>(maxCacheSize));
+			keysCache = Collections.synchronizedMap(new LRUMap<String, Set<String>>(maxCacheSize));
+		} else {
+			idCache = new ConcurrentHashMap<>();
+			keysCache = new ConcurrentHashMap<>();
+		}
 	}
 
 	private Map<String, Object> vCache;
@@ -42,7 +47,7 @@ public class MapDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 
 	@Override
 	public Object getCache(final String key) {
-		final String id = idCache.get(key);
+		final String id = (String) idCache.get(key);
 		return id != null ? vCache.get(id) : null;
 	}
 

@@ -1,10 +1,15 @@
 package net.simpleframework.ado.db.cache;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.simpleframework.ado.db.DbEntityTable;
 import net.simpleframework.common.IoUtils_hessian;
 import net.simpleframework.common.coll.KVMap;
+import net.simpleframework.common.coll.LRUMap;
+import net.simpleframework.common.jedis.JedisMap;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -16,12 +21,20 @@ import redis.clients.jedis.JedisPool;
  *         http://www.simpleframework.net
  */
 public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
-	public JedisDbEntityManager(final DbEntityTable entityTable) {
-		super(entityTable);
-	}
 
 	public JedisDbEntityManager() {
-		super(null);
+		this(null);
+	}
+
+	public JedisDbEntityManager(final DbEntityTable entityTable) {
+		super(entityTable);
+
+		final int maxCacheSize = getMaxCacheSize();
+		if (maxCacheSize > 0) {
+			keysCache = Collections.synchronizedMap(new LRUMap<String, Set<String>>(maxCacheSize));
+		} else {
+			keysCache = new ConcurrentHashMap<>();
+		}
 	}
 
 	public static int DEFAULT_EXPIRE_TIME = 60 * 60 * 24;
@@ -32,6 +45,7 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 
 	public void setJedisPool(final JedisPool pool) {
 		this.pool = pool;
+		idCache = new JedisMap(pool, false, "JedisDbEntityManager:idCache", 3600);
 	}
 
 	public void setExpire(final int expire) {
@@ -43,7 +57,7 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 		final KVMap kv = REQUEST_THREAD_CACHE.get();
 		Jedis jedis = null;
 		try {
-			final String id = idCache.get(key);
+			final String id = (String) idCache.get(key);
 			if (id == null) {
 				return null;
 			}
@@ -101,7 +115,7 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 
 	@Override
 	public void removeCache(final String key) {
-		final String id = idCache.remove(key);
+		final String id = (String) idCache.remove(key);
 		if (id != null) {
 			Jedis jedis = null;
 			try {
