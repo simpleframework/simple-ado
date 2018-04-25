@@ -27,6 +27,7 @@ import net.simpleframework.ado.db.jdbc.JdbcUtils;
 import net.simpleframework.ado.query.DataQueryUtils;
 import net.simpleframework.common.BeanUtils;
 import net.simpleframework.common.Convert;
+import net.simpleframework.common.ID;
 
 /**
  * Licensed under the Apache License, Version 2.0
@@ -83,7 +84,8 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 		}
 		Object id = null;
 		if (val instanceof IIdBeanAware) {
-			id = (((IIdBeanAware) val).getId()).getValue();
+			final ID _id = ((IIdBeanAware) val).getId();
+			id = _id != null ? _id.getValue() : null;
 		} else if (val instanceof Map) {
 			id = ((Map<?, ?>) val).get("ID");
 		} else {
