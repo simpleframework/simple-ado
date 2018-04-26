@@ -148,15 +148,6 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 	}
 
 	@Override
-	protected int insert(final IDbEntityListener<T> l, final T... objects) {
-		// 删除已有的缓存
-		for (final T t : objects) {
-			removeVal(t);
-		}
-		return super.insert(l, objects);
-	}
-
-	@Override
 	protected int update(final IDbEntityListener<T> l, final String[] columns, final T... objects) {
 		try {
 			return super.update(l, columns, objects);
