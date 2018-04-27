@@ -111,7 +111,7 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 			if (object instanceof IParamsValue) {
 				sb.append("-").append(((IParamsValue) object).getKey());
 			} else {
-				for (final String uniqueColumn : eTable.getUniqueColumns()) {
+				for (final String uniqueColumn : eTable.getCacheColumns()) {
 					sb.append("-");
 					try {
 						Object o;

@@ -22,6 +22,8 @@ public class DbEntityTable implements Serializable {
 
 	private String[] uniqueColumns;
 
+	private String[] cacheColumns;
+
 	private boolean noCache;
 
 	private ColumnData defaultOrder;
@@ -50,6 +52,15 @@ public class DbEntityTable implements Serializable {
 
 	public DbEntityTable setUniqueColumns(final String... uniqueColumns) {
 		this.uniqueColumns = uniqueColumns;
+		return this;
+	}
+
+	public String[] getCacheColumns() {
+		return cacheColumns == null ? getUniqueColumns() : cacheColumns;
+	}
+
+	public DbEntityTable setCacheColumns(final String... cacheColumns) {
+		this.cacheColumns = cacheColumns;
 		return this;
 	}
 
