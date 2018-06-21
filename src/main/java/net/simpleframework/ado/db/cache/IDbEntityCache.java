@@ -25,12 +25,6 @@ public interface IDbEntityCache {
 	 */
 	void putCache(String key, Object data);
 
-	/**
-	 * 
-	 * @param key
-	 */
-	void removeCache(String key);
-
 	void removeVal(Object val);
 
 	/**

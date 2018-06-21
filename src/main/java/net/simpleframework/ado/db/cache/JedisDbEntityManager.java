@@ -1,15 +1,10 @@
 package net.simpleframework.ado.db.cache;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import net.simpleframework.ado.db.DbEntityTable;
 import net.simpleframework.common.IoUtils_hessian;
 import net.simpleframework.common.coll.KVMap;
-import net.simpleframework.common.coll.LRUMap;
-import net.simpleframework.common.jedis.JedisMap;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -21,6 +16,9 @@ import redis.clients.jedis.JedisPool;
  *         http://www.simpleframework.net
  */
 public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
+	public static int DEFAULT_EXPIRE_TIME = 60 * 60 * 24;
+
+	private int expire = DEFAULT_EXPIRE_TIME;
 
 	public JedisDbEntityManager() {
 		this(null);
@@ -28,24 +26,12 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 
 	public JedisDbEntityManager(final DbEntityTable entityTable) {
 		super(entityTable);
-
-		final int maxCacheSize = getMaxCacheSize();
-		if (maxCacheSize > 0) {
-			keysCache = Collections.synchronizedMap(new LRUMap<String, Set<String>>(maxCacheSize));
-		} else {
-			keysCache = new ConcurrentHashMap<>();
-		}
 	}
-
-	public static int DEFAULT_EXPIRE_TIME = 60 * 60 * 24;
-
-	private int expire = DEFAULT_EXPIRE_TIME;
 
 	private JedisPool pool;
 
 	public void setJedisPool(final JedisPool pool) {
 		this.pool = pool;
-		idCache = new JedisMap(pool, false, "JedisDbEntityManager:idCache", 3600);
 	}
 
 	public void setExpire(final int expire) {
@@ -69,14 +55,16 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			if (val == null) {
 				jedis = pool.getResource();
 				val = deserialize(jedis.get(id.getBytes()));
-				if (kv != null) {
-					kv.put(id, val);
+				if (val == null) {
+					idCache.remove(key);
+				} else {
+					if (kv != null) {
+						kv.put(id, val);
+					}
 				}
 			}
 			return val;
 		} catch (final Throwable e) {
-			removeCache(key);
-			// 释放redis对象
 			getLog().warn(e);
 			return null;
 		} finally {
@@ -95,8 +83,6 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			final String id = getId(val);
 			if (id != null) {
 				idCache.put(key, id);
-				// 插入key值缓存
-				putKeys(id, key);
 
 				if (expire > 0) {
 					jedis.setex(id.getBytes(), expire, serialize(val));
@@ -109,24 +95,6 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 		} finally {
 			if (jedis != null) {
 				jedis.close();
-			}
-		}
-	}
-
-	@Override
-	public void removeCache(final String key) {
-		final String id = (String) idCache.remove(key);
-		if (id != null) {
-			Jedis jedis = null;
-			try {
-				jedis = pool.getResource();
-				jedis.del(id.getBytes());
-			} catch (final Throwable e) {
-				getLog().warn(e);
-			} finally {
-				if (jedis != null) {
-					jedis.close();
-				}
 			}
 		}
 	}
@@ -148,9 +116,6 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 					jedis.close();
 				}
 			}
-
-			// 删除id缓存
-			removeKeys(id);
 		}
 	}
 

@@ -1,14 +1,11 @@
 package net.simpleframework.ado.db.cache;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.simpleframework.ado.IParamsValue;
 import net.simpleframework.ado.IParamsValue.AbstractParamsValue;
@@ -22,12 +19,11 @@ import net.simpleframework.ado.db.common.SQLValue;
 import net.simpleframework.ado.db.event.IDbEntityListener;
 import net.simpleframework.ado.db.event.IDbListener;
 import net.simpleframework.ado.db.jdbc.IJdbcProvider;
-import net.simpleframework.ado.db.jdbc.IJdbcTransactionEvent.JdbcTransactionEvent;
-import net.simpleframework.ado.db.jdbc.JdbcUtils;
 import net.simpleframework.ado.query.DataQueryUtils;
 import net.simpleframework.common.BeanUtils;
 import net.simpleframework.common.Convert;
 import net.simpleframework.common.ID;
+import net.simpleframework.common.coll.LRUMap;
 
 /**
  * Licensed under the Apache License, Version 2.0
@@ -46,9 +42,6 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 	/* 缓存key->id */
 	protected Map<String, Object> idCache;
 
-	// 反向map，保存keys
-	protected Map<String, Set<String>> keysCache;
-
 	public AbstractCacheDbEntityManager(final DbEntityTable entityTable) {
 		super(entityTable);
 		if (entityTable != null) {
@@ -56,6 +49,13 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 			if (maxCacheSize > 0) {
 				setMaxCacheSize(maxCacheSize);
 			}
+		}
+
+		final int maxCacheSize = getMaxCacheSize();
+		if (maxCacheSize > 0) {
+			idCache = Collections.synchronizedMap(new LRUMap<String, Object>(maxCacheSize));
+		} else {
+			idCache = new ConcurrentHashMap<>();
 		}
 	}
 
@@ -71,11 +71,6 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 	@Override
 	public synchronized void reset() {
 		idCache.clear();
-	}
-
-	@Override
-	public void removeCache(final String key) {
-		idCache.remove(key);
 	}
 
 	protected String getId(final Object val) {
@@ -137,11 +132,6 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 			return super.delete(l, paramsValue);
 		} finally {
 			for (final T t : keys) {
-				if (getJdbcProvider().inTrans()) {
-					final CacheTransactionEvent jEvent = JdbcUtils
-							.addTransactionEvent(new CacheTransactionEvent());
-					jEvent.addRobject(this, t);
-				}
 				removeVal(t);
 			}
 		}
@@ -154,35 +144,7 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 		} finally {
 			// 同一个bean，由于条件不同，可能有多个key，当更新时，直接从缓存删掉(更好办法？)
 			for (final T t : objects) {
-				if (getJdbcProvider().inTrans()) {
-					final CacheTransactionEvent jEvent = JdbcUtils
-							.addTransactionEvent(new CacheTransactionEvent());
-					jEvent.addRobject(this, t);
-				}
 				removeVal(t);
-			}
-		}
-	}
-
-	protected class CacheTransactionEvent extends JdbcTransactionEvent {
-
-		private final Map<AbstractCacheDbEntityManager<T>, List<T>> removes = new HashMap<>();
-
-		public void addRobject(final AbstractCacheDbEntityManager<T> mgr, final T t) {
-			List<T> list = removes.get(mgr);
-			if (list == null) {
-				removes.put(mgr, list = new ArrayList<>());
-			}
-			list.add(t);
-		}
-
-		@Override
-		public void onFinally(final Connection connection) {
-			for (final Map.Entry<AbstractCacheDbEntityManager<T>, List<T>> e : removes.entrySet()) {
-				final AbstractCacheDbEntityManager<T> mgr = e.getKey();
-				for (final T t : e.getValue()) {
-					mgr.removeVal(t);
-				}
 			}
 		}
 	}
@@ -315,23 +277,5 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 			reset();
 		}
 		return ret;
-	}
-
-	protected void removeKeys(final String id) {
-		// 删除id缓存
-		final Set<String> keys = keysCache.remove(id);
-		if (keys != null) {
-			for (final String key : keys) {
-				idCache.remove(key);
-			}
-		}
-	}
-
-	protected void putKeys(final String id, final String key) {
-		Set<String> keys = keysCache.get(id);
-		if (keys == null) {
-			keysCache.put(id, keys = new HashSet<>());
-		}
-		keys.add(key);
 	}
 }

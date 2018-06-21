@@ -78,7 +78,7 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 	@Override
 	public int getFetchSize() {
 		if (fetchSize < 0 || fetchSize >= Integer.MAX_VALUE) {
-			setFetchSize(15);
+			setFetchSize(30);
 		}
 		return fetchSize;
 	}
