@@ -153,7 +153,8 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 	@Override
 	public T queryForBean(final String[] columns, final IParamsValue paramsValue) {
 		final String key = toUniqueString(paramsValue);
-		if (key == null) {
+		// 在事务中不走缓存，防止数据不一致
+		if (key == null || getJdbcProvider().inTrans()) {
 			return super.queryForBean(columns, paramsValue);
 		}
 		T t = (T) getCache(key);
