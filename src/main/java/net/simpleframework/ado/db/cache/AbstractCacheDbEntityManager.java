@@ -20,6 +20,7 @@ import net.simpleframework.ado.db.event.IDbEntityListener;
 import net.simpleframework.ado.db.event.IDbListener;
 import net.simpleframework.ado.db.jdbc.IJdbcProvider;
 import net.simpleframework.ado.query.DataQueryUtils;
+import net.simpleframework.common.AlgorithmUtils;
 import net.simpleframework.common.BeanUtils;
 import net.simpleframework.common.Convert;
 import net.simpleframework.common.ID;
@@ -122,7 +123,7 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 				}
 			}
 		}
-		return sb.toString();
+		return AlgorithmUtils.md5Hex(sb.toString());
 	}
 
 	@Override
