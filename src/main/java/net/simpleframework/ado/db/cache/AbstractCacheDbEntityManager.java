@@ -1,8 +1,10 @@
 package net.simpleframework.ado.db.cache;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,6 +21,8 @@ import net.simpleframework.ado.db.common.SQLValue;
 import net.simpleframework.ado.db.event.IDbEntityListener;
 import net.simpleframework.ado.db.event.IDbListener;
 import net.simpleframework.ado.db.jdbc.IJdbcProvider;
+import net.simpleframework.ado.db.jdbc.IJdbcTransactionEvent.JdbcTransactionEvent;
+import net.simpleframework.ado.db.jdbc.JdbcUtils;
 import net.simpleframework.ado.query.DataQueryUtils;
 import net.simpleframework.common.AlgorithmUtils;
 import net.simpleframework.common.BeanUtils;
@@ -129,23 +133,78 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 	@Override
 	protected int delete(final IDbEntityListener<T> l, final IParamsValue paramsValue) {
 		final List<T> keys = DataQueryUtils.toList(queryBeans(paramsValue));
+		CacheTransactionEvent jEvent = null;
 		try {
+			jEvent = getCacheTransactionEvent();
 			return super.delete(l, paramsValue);
 		} finally {
 			for (final T t : keys) {
-				removeVal(t);
+				if (jEvent != null) {
+					jEvent.addVal(t);
+				} else {
+					removeVal(t);
+				}
 			}
 		}
 	}
 
 	@Override
 	protected int update(final IDbEntityListener<T> l, final String[] columns, final T... objects) {
+		CacheTransactionEvent jEvent = null;
 		try {
+			jEvent = getCacheTransactionEvent();
 			return super.update(l, columns, objects);
 		} finally {
 			// 同一个bean，由于条件不同，可能有多个key，当更新时，直接从缓存删掉(更好办法？)
 			for (final T t : objects) {
-				removeVal(t);
+				if (jEvent != null) {
+					jEvent.addVal(t);
+				} else {
+					removeVal(t);
+				}
+			}
+		}
+	}
+
+	private CacheTransactionEvent getCacheTransactionEvent() {
+		CacheTransactionEvent jEvent = null;
+		if (getJdbcProvider().inTrans()) {
+			jEvent = JdbcUtils.addTransactionEvent(new CacheTransactionEvent());
+			final Map<String, Object> data = trans.get();
+			if (data == null) {
+				trans.set(new HashMap<String, Object>());
+			}
+		}
+		return jEvent;
+	}
+
+	protected Object getTransObj(final String id) {
+		final Map<String, Object> data = trans.get();
+		return data != null ? data.get(id) : null;
+	}
+
+	private static final ThreadLocal<Map<String, Object>> trans = new ThreadLocal<>();
+
+	protected class CacheTransactionEvent extends JdbcTransactionEvent {
+		public void addVal(final T t) {
+			// 事务缓存，通过getCache获取
+			final Map<String, Object> data = trans.get();
+			if (data != null) {
+				final String id = getId(t);
+				if (id != null) {
+					data.put(id, t);
+				}
+			}
+		}
+
+		@Override
+		public void onFinally(final Connection connection) {
+			final Map<String, Object> data = trans.get();
+			if (data != null) {
+				for (final Object val : data.values()) {
+					removeVal(val);
+				}
+				trans.remove();
 			}
 		}
 	}
@@ -154,10 +213,10 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 	@Override
 	public T queryForBean(final String[] columns, final IParamsValue paramsValue) {
 		final String key = toUniqueString(paramsValue);
-		// 在事务中不走缓存，防止数据不一致
-		if (key == null || getJdbcProvider().inTrans()) {
+		if (key == null) {
 			return super.queryForBean(columns, paramsValue);
 		}
+
 		T t = (T) getCache(key);
 		if (t == null || t instanceof Map) {
 			// 此处传递null，而非columns，目的是在缓存情况下，忽略columns参数
@@ -185,8 +244,8 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 					if (key == null) {
 						return wrapper.toBean(jdbcProvider, rs);
 					}
-					T t = (T) getCache(key);
 
+					T t = (T) getCache(key);
 					if (t == null || t instanceof Map
 							|| wrapper.getPropertiesCount(t) < rs.getMetaData().getColumnCount()) {
 						if ((t = wrapper.toBean(jdbcProvider, rs)) != null) {

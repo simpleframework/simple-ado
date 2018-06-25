@@ -40,7 +40,6 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 
 	@Override
 	public Object getCache(final String key) {
-		final KVMap kv = REQUEST_THREAD_CACHE.get();
 		Jedis jedis = null;
 		try {
 			final String id = (String) idCache.get(key);
@@ -48,19 +47,27 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 				return null;
 			}
 
-			Object val = null;
+			// 获取当前事务下的修改对象
+			Object val = getTransObj(id);
+			if (val != null) {
+				return val;
+			}
+
+			final KVMap kv = REQUEST_THREAD_CACHE.get();
 			if (kv != null) {
 				val = kv.get(id);
+				if (val != null) {
+					return val;
+				}
 			}
+
+			jedis = pool.getResource();
+			val = deserialize(jedis.get(id.getBytes()));
 			if (val == null) {
-				jedis = pool.getResource();
-				val = deserialize(jedis.get(id.getBytes()));
-				if (val == null) {
-					idCache.remove(key);
-				} else {
-					if (kv != null) {
-						kv.put(id, val);
-					}
+				idCache.remove(key);
+			} else {
+				if (kv != null) {
+					kv.put(id, val);
 				}
 			}
 			return val;

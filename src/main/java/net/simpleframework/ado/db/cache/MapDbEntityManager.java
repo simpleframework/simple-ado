@@ -41,7 +41,14 @@ public class MapDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 		if (id == null) {
 			return null;
 		}
-		final Object val = vCache.get(id);
+
+		// 获取当前事务下的修改对象
+		Object val = getTransObj(id);
+		if (val != null) {
+			return val;
+		}
+
+		val = vCache.get(id);
 		if (val == null) {
 			idCache.remove(key);
 		}
