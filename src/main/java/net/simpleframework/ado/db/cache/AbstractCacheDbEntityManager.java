@@ -26,7 +26,6 @@ import net.simpleframework.ado.db.jdbc.JdbcUtils;
 import net.simpleframework.ado.query.DataQueryUtils;
 import net.simpleframework.common.AlgorithmUtils;
 import net.simpleframework.common.BeanUtils;
-import net.simpleframework.common.Convert;
 import net.simpleframework.common.ID;
 import net.simpleframework.common.coll.LRUMap;
 
@@ -91,7 +90,7 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 		} else {
 			id = BeanUtils.getProperty(val, "id");
 		}
-		return id == null ? null : Convert.toString(id);
+		return id == null ? null : val.getClass().getSimpleName() + ":" + id;
 	}
 
 	protected String toUniqueString(final Object object) {
