@@ -397,6 +397,11 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 		return function(column, "max", paramsValue);
 	}
 
+	@Override
+	public Number min(final String column, final IParamsValue paramsValue) {
+		return function(column, "min", paramsValue);
+	}
+
 	private Number function(final String column, final String function,
 			final IParamsValue paramsValue) {
 		SQLValue sqlVal;

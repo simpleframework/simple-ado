@@ -135,6 +135,8 @@ public interface IDbEntityManager<T> extends IDbManager {
 
 	Number max(String column, IParamsValue paramsValue);
 
+	Number min(String column, IParamsValue paramsValue);
+
 	/**
 	 * 交换位置
 	 * 
