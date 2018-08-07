@@ -54,11 +54,8 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			}
 
 			final KVMap kv = REQUEST_THREAD_CACHE.get();
-			if (kv != null) {
-				val = kv.get(id);
-				if (val != null) {
-					return val;
-				}
+			if (kv != null && (val = kv.get(id)) != null) {
+				return val;
 			}
 
 			jedis = pool.getResource();
