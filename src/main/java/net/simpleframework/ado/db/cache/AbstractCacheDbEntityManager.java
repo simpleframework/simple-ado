@@ -201,7 +201,12 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 			final Map<String, Object> data = trans.get();
 			if (data != null) {
 				for (final Object val : data.values()) {
-					removeVal(val);
+					final Object emgr = dbFactory.getEntityManager(val.getClass());
+					if (emgr instanceof IDbEntityCache) {
+						((IDbEntityCache) emgr).removeVal(val);
+					} else {
+						removeVal(val);
+					}
 				}
 				trans.remove();
 			}
