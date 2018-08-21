@@ -57,7 +57,7 @@ public class MapDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 
 	@Override
 	public void putCache(final String key, final Object val) {
-		if (inTrans()) {
+		if (getJdbcProvider().inTrans()) {
 			return;
 		}
 		final String id = getId(val);
