@@ -165,9 +165,13 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 		}
 	}
 
+	protected boolean inTrans() {
+		return getJdbcProvider().inTrans();
+	}
+
 	private CacheTransactionEvent getCacheTransactionEvent() {
 		CacheTransactionEvent jEvent = null;
-		if (getJdbcProvider().inTrans()) {
+		if (inTrans()) {
 			jEvent = JdbcUtils.addTransactionEvent(new CacheTransactionEvent());
 			final Map<String, Object> data = trans.get();
 			if (data == null) {
