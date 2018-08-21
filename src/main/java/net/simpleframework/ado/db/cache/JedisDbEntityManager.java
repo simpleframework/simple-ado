@@ -42,7 +42,7 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 	public Object getCache(final String key) {
 		Jedis jedis = null;
 		try {
-			final String id = (String) idCache.get(key);
+			final String id = getIdCache(key);
 			if (id == null) {
 				return null;
 			}
@@ -60,12 +60,8 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 
 			jedis = pool.getResource();
 			val = deserialize(jedis.get(id.getBytes()));
-			if (val == null) {
-				idCache.remove(key);
-			} else {
-				if (kv != null) {
-					kv.put(id, val);
-				}
+			if (kv != null && val != null) {
+				kv.put(id, val);
 			}
 			return val;
 		} catch (final Throwable e) {
@@ -81,15 +77,12 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 
 	@Override
 	public void putCache(final String key, final Object val) {
-		if (getJdbcProvider().inTrans()) {
-			return;
-		}
 		Jedis jedis = null;
 		try {
 			jedis = pool.getResource();
 			final String id = getId(val);
 			if (id != null) {
-				idCache.put(key, id);
+				putIdCache(key, id);
 
 				if (expire > 0) {
 					jedis.setex(id.getBytes(), expire, serialize(val));
@@ -112,6 +105,9 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 		if (id != null) {
 			Jedis jedis = null;
 			try {
+				// 删除idCache
+				removeIdCache(id);
+
 				jedis = pool.getResource();
 				if (jedis.del(id.getBytes()) == 0) {
 					getLog().debug("jedis: del -> 0");

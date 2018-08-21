@@ -37,7 +37,7 @@ public class MapDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 
 	@Override
 	public Object getCache(final String key) {
-		final String id = (String) idCache.get(key);
+		final String id = getIdCache(key);
 		if (id == null) {
 			return null;
 		}
@@ -49,21 +49,15 @@ public class MapDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 		}
 
 		val = vCache.get(id);
-		if (val == null) {
-			idCache.remove(key);
-		}
 		return val;
 	}
 
 	@Override
 	public void putCache(final String key, final Object val) {
-		if (getJdbcProvider().inTrans()) {
-			return;
-		}
 		final String id = getId(val);
 		if (id != null) {
 			// 插入id缓存
-			idCache.put(key, id);
+			putIdCache(key, id);
 			// 插入值缓存
 			vCache.put(id, val);
 		}
@@ -73,7 +67,8 @@ public class MapDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 	public void removeVal(final Object val) {
 		final String id = getId(val);
 		if (id != null) {
-			// idCache不删除，仅删除实际id对应的值
+			// 删除idCache
+			removeIdCache(id);
 			// 删除值缓存
 			vCache.remove(id);
 		}

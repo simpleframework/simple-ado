@@ -5,8 +5,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.simpleframework.ado.IParamsValue;
@@ -44,7 +46,9 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 	}
 
 	/* 缓存key->id */
-	protected Map<String, Object> idCache;
+	private Map<String, String> idCache;
+	/* 缓存id->keys */
+	private Map<String, Set<String>> keysCache;
 
 	public AbstractCacheDbEntityManager(final DbEntityTable entityTable) {
 		super(entityTable);
@@ -57,9 +61,11 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 
 		final int maxCacheSize = getMaxCacheSize();
 		if (maxCacheSize > 0) {
-			idCache = Collections.synchronizedMap(new LRUMap<String, Object>(maxCacheSize));
+			idCache = Collections.synchronizedMap(new LRUMap<String, String>(maxCacheSize));
+			keysCache = Collections.synchronizedMap(new LRUMap<String, Set<String>>(maxCacheSize));
 		} else {
 			idCache = new ConcurrentHashMap<>();
+			keysCache = new ConcurrentHashMap<>();
 		}
 	}
 
@@ -75,6 +81,30 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 	@Override
 	public synchronized void reset() {
 		idCache.clear();
+		keysCache.clear();
+	}
+
+	protected String getIdCache(final String key) {
+		return idCache.get(key);
+	}
+
+	protected synchronized void putIdCache(final String key, final String id) {
+		idCache.put(key, id);
+
+		Set<String> keys = keysCache.get(id);
+		if (keys == null) {
+			keysCache.put(id, keys = new HashSet<>());
+		}
+		keys.add(key);
+	}
+
+	protected synchronized void removeIdCache(final String id) {
+		final Set<String> keys = keysCache.remove(id);
+		if (keys != null) {
+			for (final String key : keys) {
+				idCache.remove(key);
+			}
+		}
 	}
 
 	protected String getId(final Object val) {
