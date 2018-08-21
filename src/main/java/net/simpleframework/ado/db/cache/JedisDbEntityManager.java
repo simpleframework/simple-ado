@@ -81,6 +81,9 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 
 	@Override
 	public void putCache(final String key, final Object val) {
+		if (inTrans()) {
+			return;
+		}
 		Jedis jedis = null;
 		try {
 			jedis = pool.getResource();
