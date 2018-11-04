@@ -67,6 +67,11 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 	}
 
 	@Override
+	public IDbDataQuery<T> setCount(final int count) {
+		return (IDbDataQuery<T>) super.setCount(count);
+	}
+
+	@Override
 	public DbDataQuery<T> setFetchSize(final int fetchSize) {
 		if (this.fetchSize != fetchSize) {
 			this.fetchSize = fetchSize;

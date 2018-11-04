@@ -22,6 +22,9 @@ public interface IDbDataQuery<T> extends IDataQuery<T> {
 	 */
 	DataSource getDataSource();
 
+	@Override
+	IDbDataQuery<T> setCount(int count);
+
 	/**
 	 * 当前query的sql对象
 	 * 
