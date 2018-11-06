@@ -32,6 +32,8 @@ public interface IDbDataQuery<T> extends IDataQuery<T> {
 	 */
 	SQLValue getSqlValue();
 
+	DbDataQuery<T> setCsqlVal(SQLValue csqlVal);
+
 	/**
 	 * 添加条件并重置
 	 * 

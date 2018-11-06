@@ -36,6 +36,9 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 
 	private SQLValue sqlVal;
 
+	/* count sql */
+	private SQLValue csqlVal;
+
 	/* 分页取值的大小, 当等于0时, 要手动close */
 	private int fetchSize = -1;
 
@@ -104,8 +107,9 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 	@Override
 	public int getCount() {
 		if (count < 0) {
-			final SQLValue countSql = new SQLValue(
-					getJdbcProvider().getJdbcDialect().toCountSQL(sqlVal.getSql()), sqlVal.getValues());
+			final SQLValue countSql = csqlVal != null ? csqlVal
+					: new SQLValue(getJdbcProvider().getJdbcDialect().toCountSQL(sqlVal.getSql()),
+							sqlVal.getValues());
 			count = getJdbcProvider().queryObject(countSql, new IQueryExtractor<Integer>() {
 				@Override
 				public Integer extractData(final ResultSet rs) throws SQLException, ADOException {
@@ -218,6 +222,12 @@ public class DbDataQuery<T> extends AbstractDataQuery<T> implements IDbDataQuery
 	@Override
 	public SQLValue getSqlValue() {
 		return sqlVal;
+	}
+
+	@Override
+	public DbDataQuery<T> setCsqlVal(final SQLValue csqlVal) {
+		this.csqlVal = csqlVal;
+		return this;
 	}
 
 	@Override
