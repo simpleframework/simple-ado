@@ -168,16 +168,12 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 			return super.delete(l, paramsValue);
 		} finally {
 			for (final T t : keys) {
-				onDeleteCache(jEvent, t);
+				if (jEvent != null) {
+					jEvent.addVal(t);
+				} else {
+					removeVal(t);
+				}
 			}
-		}
-	}
-
-	protected void onDeleteCache(final CacheTransactionEvent jEvent, final T t) {
-		if (jEvent != null) {
-			jEvent.remove(t);
-		} else {
-			removeVal(t);
 		}
 	}
 
@@ -191,7 +187,7 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 			// 同一个bean，由于条件不同，可能有多个key，当更新时，直接从缓存删掉(更好办法？)
 			for (final T t : objects) {
 				if (jEvent != null) {
-					jEvent.add(t);
+					jEvent.addVal(t);
 				} else {
 					removeVal(t);
 				}
@@ -219,23 +215,13 @@ public abstract class AbstractCacheDbEntityManager<T> extends DbEntityManager<T>
 	private static final ThreadLocal<Map<String, Object>> trans = new ThreadLocal<>();
 
 	protected class CacheTransactionEvent extends JdbcTransactionEvent {
-		public void add(final T t) {
+		public void addVal(final T t) {
 			// 事务缓存，通过getCache获取
 			final Map<String, Object> data = trans.get();
 			if (data != null) {
 				final String id = getId(t);
 				if (id != null) {
 					data.put(id, t);
-				}
-			}
-		}
-
-		public void remove(final T t) {
-			final Map<String, Object> data = trans.get();
-			if (data != null) {
-				final String id = getId(t);
-				if (id != null) {
-					data.remove(id);
 				}
 			}
 		}
