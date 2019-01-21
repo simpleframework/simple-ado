@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import net.simpleframework.ado.db.DbEntityTable;
 import net.simpleframework.common.IoUtils_hessian;
-import net.simpleframework.common.coll.KVMap;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -48,22 +47,13 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 			}
 
 			// 获取当前事务下的修改对象
-			Object val = getTransObj(id);
+			final Object val = getTransObj(id);
 			if (val != null) {
 				return val;
 			}
 
-			final KVMap kv = REQUEST_THREAD_CACHE.get();
-			if (kv != null && (val = kv.get(id)) != null) {
-				return val;
-			}
-
 			jedis = pool.getResource();
-			val = deserialize(jedis.get(id.getBytes()));
-			if (kv != null && val != null) {
-				kv.put(id, val);
-			}
-			return val;
+			return deserialize(jedis.get(id.getBytes()));
 		} catch (final Throwable e) {
 			getLog().warn(e);
 			return null;
