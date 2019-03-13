@@ -101,11 +101,13 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 		return null;
 	}
 
-	protected void objectToDocument(final Object obj, final LuceneDocument doc) throws IOException {
+	protected boolean objectToDocument(final Object obj, final LuceneDocument doc)
+			throws IOException {
 		final String id = getId(obj);
 		if (StringUtils.hasText(id)) {
 			doc.addStringField("id", id, true);
 		}
+		return true;
 	}
 
 	protected IDataQuery<?> queryAll() {
@@ -127,8 +129,9 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 			dq.setFetchSize(0);
 			for (Object obj; (obj = dq.next()) != null;) {
 				final LuceneDocument document = new LuceneDocument();
-				objectToDocument(obj, document);
-				iWriter.addDocument(document.doc);
+				if (objectToDocument(obj, document)) {
+					iWriter.addDocument(document.doc);
+				}
 			}
 			iWriter.commit();
 		} catch (final IOException e) {
@@ -145,8 +148,9 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 			iWriter = createIndexWriter();
 			for (final Object obj : objects) {
 				final LuceneDocument document = new LuceneDocument();
-				objectToDocument(obj, document);
-				iWriter.addDocument(document.doc);
+				if (objectToDocument(obj, document)) {
+					iWriter.addDocument(document.doc);
+				}
 			}
 		} catch (final IOException e) {
 			throw ADOException.of(e);
@@ -164,8 +168,9 @@ public abstract class AbstractLuceneManager extends AbstractADOManager implement
 				final String id = getId(obj);
 				if (StringUtils.hasText(id)) {
 					final LuceneDocument document = new LuceneDocument();
-					objectToDocument(obj, document);
-					iWriter.updateDocument(new Term("id", id), document.doc);
+					if (objectToDocument(obj, document)) {
+						iWriter.updateDocument(new Term("id", id), document.doc);
+					}
 				}
 			}
 		} catch (final IOException e) {
