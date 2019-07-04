@@ -12,6 +12,7 @@ import net.simpleframework.ado.ADOException;
 import net.simpleframework.ado.bean.IIdBeanAware;
 import net.simpleframework.ado.db.common.SQLValue;
 import net.simpleframework.common.ClassUtils;
+import net.simpleframework.common.Convert;
 import net.simpleframework.common.ID;
 import net.simpleframework.common.object.ObjectEx;
 
@@ -73,7 +74,17 @@ public class DefaultStatementCreator extends ObjectEx implements IStatementCreat
 		final Object[] newValues = new Object[values.length];
 		for (int i = 0; i < values.length; i++) {
 			if (values[i] instanceof Enum<?>) {
-				newValues[i] = ((Enum<?>) values[i]).ordinal();
+				final Enum<?> e = (Enum<?>) values[i];
+				boolean invoke = false;
+				try {
+					final Method method = e.getClass().getMethod("index");
+					newValues[i] = Convert.toInt(method.invoke(e));
+					invoke = true;
+				} catch (final Exception ex) {
+				}
+				if (!invoke) {
+					newValues[i] = e.ordinal();
+				}
 			} else if (values[i] instanceof ID) {
 				newValues[i] = ((ID) values[i]).getValue();
 			} else if (values[i] instanceof IIdBeanAware) {
