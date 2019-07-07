@@ -76,11 +76,16 @@ public class DefaultStatementCreator extends ObjectEx implements IStatementCreat
 			if (values[i] instanceof Enum<?>) {
 				final Enum<?> e = (Enum<?>) values[i];
 				boolean invoke = false;
+				final Class<?> eClass = e.getClass();
 				try {
-					final Method method = e.getClass().getMethod("index");
+					final Method method = eClass.getMethod("intValue");
+					method.setAccessible(true);
 					newValues[i] = Convert.toInt(method.invoke(e));
 					invoke = true;
 				} catch (final Exception ex) {
+					// throw ADOException.of(
+					// String.format("%s未实现方法：public abstract int intValue();",
+					// eClass.getName()));
 				}
 				if (!invoke) {
 					newValues[i] = e.ordinal();
