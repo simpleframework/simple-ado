@@ -83,9 +83,8 @@ public class DefaultStatementCreator extends ObjectEx implements IStatementCreat
 					newValues[i] = Convert.toInt(method.invoke(e));
 					invoke = true;
 				} catch (final Exception ex) {
-					// throw ADOException.of(
-					// String.format("%s未实现方法：public abstract int intValue();",
-					// eClass.getName()));
+					// throw NotImplementedException.of(eClass, "public abstract int
+					// intValue();");
 				}
 				if (!invoke) {
 					newValues[i] = e.ordinal();
