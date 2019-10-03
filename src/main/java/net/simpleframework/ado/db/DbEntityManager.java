@@ -275,22 +275,24 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 			}
 
 			for (final Object bean : beans) {
-				if (bean instanceof IIdBeanAware) {
-					final IIdBeanAware idBean = (IIdBeanAware) bean;
-					if (idBean.getId() == null) {
-						idBean.setId(ID.uuid());
-					}
-					if (idBean instanceof IOrderBeanAware) {
-						final IOrderBeanAware oBean = (IOrderBeanAware) bean;
-						if (oBean.getOorder() == 0) {
-							int max = max("oorder", null).intValue();
-							oBean.setOorder(++max);
+				synchronized (bean) {
+					if (bean instanceof IIdBeanAware) {
+						final IIdBeanAware idBean = (IIdBeanAware) bean;
+						if (idBean.getId() == null) {
+							idBean.setId(ID.uuid());
+						}
+						if (idBean instanceof IOrderBeanAware) {
+							final IOrderBeanAware oBean = (IOrderBeanAware) bean;
+							if (oBean.getOorder() == 0) {
+								int max = max("oorder", null).intValue();
+								oBean.setOorder(++max);
+							}
 						}
 					}
-				}
-				final SQLValue sqlVal = SQLBuilder.getInsertSQLValue(getEntityTable(), bean);
-				if (sqlVal != null) {
-					ret += executeUpdate(sqlVal);
+					final SQLValue sqlVal = SQLBuilder.getInsertSQLValue(getEntityTable(), bean);
+					if (sqlVal != null) {
+						ret += executeUpdate(sqlVal);
+					}
 				}
 			}
 			for (final IDbEntityListener<T> listener : listeners) {
