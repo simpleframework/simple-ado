@@ -1,9 +1,11 @@
 package net.simpleframework.ado.db.cache;
 
 import java.io.IOException;
+import java.util.Map;
 
 import net.simpleframework.ado.db.DbEntityTable;
 import net.simpleframework.common.IoUtils_hessian;
+import net.simpleframework.common.jedis.JedisMap;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
@@ -35,6 +37,11 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 
 	public void setExpire(final int expire) {
 		this.expire = expire;
+	}
+
+	@Override
+	protected Map<String, Object> createAutoincMap() {
+		return new JedisMap(pool, "AUTO_INC");
 	}
 
 	@Override

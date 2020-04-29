@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import net.simpleframework.ado.ADOException;
@@ -260,6 +261,25 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 		return insert(null, beans);
 	}
 
+	protected Map<String, Object> createAutoincMap() {
+		return new HashMap<>();
+	}
+
+	protected Map<String, Object> _autoinc;
+
+	protected synchronized int autoinc(final String tbl, final String col) {
+		if (_autoinc == null) {
+			_autoinc = createAutoincMap();
+		}
+		final String key = tbl + ":" + col;
+		Integer iVal = (Integer) _autoinc.get(key);
+		if (iVal == null) {
+			iVal = max(col, null).intValue();
+		}
+		_autoinc.put(key, ++iVal);
+		return iVal;
+	}
+
 	@SuppressWarnings("unchecked")
 	protected int insert(final IDbEntityListener<T> l, T... beans) {
 		beans = (T[]) ArrayUtils.removeDuplicatesAndNulls(beans);
@@ -274,6 +294,7 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 				listener.onBeforeInsert(this, beans);
 			}
 
+			final DbEntityTable eTable = getEntityTable();
 			for (final Object bean : beans) {
 				synchronized (bean) {
 					if (bean instanceof IIdBeanAware) {
@@ -284,12 +305,12 @@ public class DbEntityManager<T> extends AbstractDbManager implements IDbEntityMa
 						if (idBean instanceof IOrderBeanAware) {
 							final IOrderBeanAware oBean = (IOrderBeanAware) bean;
 							if (oBean.getOorder() == 0) {
-								int max = max("oorder", null).intValue();
-								oBean.setOorder(++max);
+								// int max = max("oorder", null).intValue();
+								oBean.setOorder(autoinc(eTable.getName(), "oorder"));
 							}
 						}
 					}
-					final SQLValue sqlVal = SQLBuilder.getInsertSQLValue(getEntityTable(), bean);
+					final SQLValue sqlVal = SQLBuilder.getInsertSQLValue(eTable, bean);
 					if (sqlVal != null) {
 						ret += executeUpdate(sqlVal);
 					}
