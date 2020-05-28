@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import net.simpleframework.ado.db.DbEntityTable;
-import net.simpleframework.common.IoUtils_hessian;
+import net.simpleframework.common.SerializeUtils;
 import net.simpleframework.common.jedis.JedisMap;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -120,12 +120,12 @@ public class JedisDbEntityManager<T> extends AbstractCacheDbEntityManager<T> {
 	}
 
 	private byte[] serialize(final Object obj) throws IOException {
-		return IoUtils_hessian.serialize(obj);
+		return SerializeUtils.serialize(obj);
 		// return IoUtils_kryo.serialize(obj, getBeanClass());
 	}
 
 	private Object deserialize(final byte[] bytes) throws IOException, ClassNotFoundException {
-		return IoUtils_hessian.deserialize(bytes);
+		return SerializeUtils.deserialize(bytes);
 		// return IoUtils_kryo.deserialize(bytes, getBeanClass());
 	}
 }
