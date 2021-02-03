@@ -27,8 +27,8 @@ import net.simpleframework.common.object.ObjectEx;
  */
 public abstract class AbstractJdbcProvider extends ObjectEx implements IJdbcProvider {
 
-	protected final ThreadLocal<Connection> CONNECTIONS = new ThreadLocal<>();
-
+	/* 缓存事务连接 */
+	protected final ThreadLocal<Connection> CONNECTIONs = new ThreadLocal<>();
 	/* 标识当前连接在嵌套 */
 	protected final ThreadLocal<Integer> NESTED = new ThreadLocal<>();
 
@@ -82,19 +82,31 @@ public abstract class AbstractJdbcProvider extends ObjectEx implements IJdbcProv
 
 	@Override
 	public Connection getConnection() throws SQLException {
-		synchronized (CONNECTIONS) {
-			Connection connection = CONNECTIONS.get();
-			if (connection == null) {
-				connection = getDataSource().getConnection();
-				if (!connection.getAutoCommit()) {
-					connection.setAutoCommit(true);
-				}
-			}
-			return connection;
+		return getConnection(AUTO_COMMIT.get() != null);
+	}
+
+	@Override
+	public Connection getConnection(final boolean autoCommit) throws SQLException {
+		if (autoCommit) {
+			return _getAutoCommit();
 		}
+		Connection connection = CONNECTIONs.get();
+		if (connection == null) {
+			connection = _getAutoCommit();
+		}
+		return connection;
+	}
+
+	private Connection _getAutoCommit() throws SQLException {
+		final Connection connection = getDataSource().getConnection();
+		if (!connection.getAutoCommit()) {
+			connection.setAutoCommit(true);
+		}
+		return connection;
 	}
 
 	protected Connection beginTran() throws SQLException {
+		endAutoCommit();
 		final Connection connection = getConnection();
 		if (isBeginTransaction(connection)) {
 			/* 如果存在正在运行的事务连接,直接返回 */
@@ -106,7 +118,7 @@ public abstract class AbstractJdbcProvider extends ObjectEx implements IJdbcProv
 			connection.setAutoCommit(false);
 		}
 		// connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
-		CONNECTIONS.set(connection);
+		CONNECTIONs.set(connection);
 		return connection;
 	}
 
@@ -126,7 +138,7 @@ public abstract class AbstractJdbcProvider extends ObjectEx implements IJdbcProv
 				NESTED.set(i);
 			}
 		} else {
-			CONNECTIONS.remove();
+			CONNECTIONs.remove();
 			closeAll(connection, null, null);
 		}
 	}
@@ -136,7 +148,7 @@ public abstract class AbstractJdbcProvider extends ObjectEx implements IJdbcProv
 	}
 
 	private boolean isBeginTransaction(final Connection connection) {
-		return connection == CONNECTIONS.get();
+		return connection == CONNECTIONs.get();
 	}
 
 	@Override
@@ -156,5 +168,18 @@ public abstract class AbstractJdbcProvider extends ObjectEx implements IJdbcProv
 		} catch (final SQLException e) {
 			getLog().warn(e);
 		}
+	}
+
+	/* 获取自动提交连接 */
+	protected final ThreadLocal<Boolean> AUTO_COMMIT = new ThreadLocal<>();
+
+	@Override
+	public void beginAutoCommit() {
+		AUTO_COMMIT.set(Boolean.TRUE);
+	}
+
+	@Override
+	public void endAutoCommit() {
+		AUTO_COMMIT.remove();
 	}
 }
