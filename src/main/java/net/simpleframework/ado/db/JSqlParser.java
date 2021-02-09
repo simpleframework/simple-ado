@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import com.alibaba.druid.DbType;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLOrderBy;
@@ -164,7 +165,7 @@ public abstract class JSqlParser {
 			selectQuery = sqlSelect.getQuery();
 		}
 		final SQLSelectQueryBlock qBlock = (SQLSelectQueryBlock) selectQuery;
-		final SQLExpr expr = SQLParserUtils.createExprParser(condition, dbType).expr();
+		final SQLExpr expr = SQLParserUtils.createExprParser(condition, DbType.of(dbType)).expr();
 		if (qBlock.getWhere() == null) {
 			qBlock.setWhere(expr);
 		} else {
