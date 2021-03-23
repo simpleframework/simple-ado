@@ -28,7 +28,7 @@ public interface IJdbcProvider {
 	DataSource getDataSource();
 
 	Connection getConnection(boolean autoCommit) throws SQLException;
-	
+
 	Connection getConnection() throws SQLException;
 
 	DatabaseMeta getDatabaseMeta();
@@ -107,8 +107,6 @@ public interface IJdbcProvider {
 	boolean inTrans();
 
 	void closeAll(Connection connection, Statement stat, ResultSet rs);
-	
-	void beginAutoCommit();
-	
-	void endAutoCommit();
+
+	<T> T doAutoCommit(ITransactionCallback<T> callback);
 }

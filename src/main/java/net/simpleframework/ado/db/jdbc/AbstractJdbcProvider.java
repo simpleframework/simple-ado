@@ -7,6 +7,7 @@ import java.sql.Statement;
 
 import javax.sql.DataSource;
 
+import net.simpleframework.ado.ADOException;
 import net.simpleframework.ado.db.common.SQLValue;
 import net.simpleframework.ado.db.jdbc.dialect.DefaultJdbcDialect;
 import net.simpleframework.ado.db.jdbc.dialect.HSQLJdbcDialect;
@@ -15,6 +16,7 @@ import net.simpleframework.ado.db.jdbc.dialect.MySqlJdbcDialect;
 import net.simpleframework.ado.db.jdbc.dialect.OracleJdbcDialect;
 import net.simpleframework.ado.db.jdbc.dialect.PostgresqlJdbcDialect;
 import net.simpleframework.ado.db.jdbc.dialect.SqlServerJdbcDialect;
+import net.simpleframework.ado.trans.ITransactionCallback;
 import net.simpleframework.common.Convert;
 import net.simpleframework.common.object.ObjectEx;
 
@@ -106,7 +108,6 @@ public abstract class AbstractJdbcProvider extends ObjectEx implements IJdbcProv
 	}
 
 	protected Connection beginTran() throws SQLException {
-		endAutoCommit();
 		final Connection connection = getConnection();
 		if (isBeginTransaction(connection)) {
 			/* 如果存在正在运行的事务连接,直接返回 */
@@ -174,12 +175,16 @@ public abstract class AbstractJdbcProvider extends ObjectEx implements IJdbcProv
 	protected final ThreadLocal<Boolean> AUTO_COMMIT = new ThreadLocal<>();
 
 	@Override
-	public void beginAutoCommit() {
-		AUTO_COMMIT.set(Boolean.TRUE);
-	}
-
-	@Override
-	public void endAutoCommit() {
-		AUTO_COMMIT.remove();
+	public <T> T doAutoCommit(final ITransactionCallback<T> callback) {
+		synchronized (AUTO_COMMIT) {
+			try {
+				AUTO_COMMIT.set(Boolean.TRUE);
+				return callback.onTransactionCallback();
+			} catch (final Throwable e) {
+				throw ADOException.of(e);
+			} finally {
+				AUTO_COMMIT.remove();
+			}
+		}
 	}
 }
