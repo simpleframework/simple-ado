@@ -61,6 +61,7 @@ public class DefaultJdbcProvider extends AbstractJdbcProvider {
 			return stmt.executeBatch();
 		} catch (final SQLException ex) {
 			oprintln("Error SQL: " + StringUtils.join(sqlArr, "\r\n"));
+			oprintln(ex.getMessage());
 			throw ADOException.of(ex);
 		} finally {
 			closeAll(connection, stmt, null);
