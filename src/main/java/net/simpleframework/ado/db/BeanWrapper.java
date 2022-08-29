@@ -12,6 +12,7 @@ import net.simpleframework.ado.db.jdbc.IJdbcProvider;
 import net.simpleframework.ado.db.jdbc.JdbcUtils;
 import net.simpleframework.ado.db.jdbc.dialect.IJdbcDialect;
 import net.simpleframework.common.BeanUtils;
+import net.simpleframework.common.StringUtils;
 import net.simpleframework.common.object.ObjectEx;
 import net.simpleframework.common.object.ObjectUtils;
 
@@ -113,7 +114,8 @@ public class BeanWrapper<T> extends ObjectEx {
 
 		for (final PropertyCache cache : properties) {
 			if (cache.sqlColumnIndex <= 0) {
-				final int sqlColumnIndex = JdbcUtils.lookupColumnIndex(rsmd, cache.dbColumn.getName());
+				final int sqlColumnIndex = JdbcUtils.lookupColumnIndex(rsmd, StringUtils.text(
+						cache.dbColumn.getAlias(), cache.dbColumn.getName()));
 				if (sqlColumnIndex <= 0) {
 					continue;
 				} else {
